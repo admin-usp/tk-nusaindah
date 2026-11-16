@@ -822,7 +822,7 @@
                     html: `
                         <p>Simpan Nomor Registrasi Anda untuk pengecekan status:</p>
                         <h3 class="fw-bold text-primary">${regNumber}</h3>
-                        <button type="button" class="btn btn-warning fw-bold mt-2 rounded-pill px-4" onclick="printPpdbParticipantCard('${regNumber}')">
+                        <button type="button" class="btn btn-warning fw-bold mt-2 rounded-pill px-4" onclick="Swal.close(); printPpdbParticipantCard('${regNumber}')">
                             <i class="fa-solid fa-print me-1"></i> Cetak Kartu Peserta (PDF)
                         </button>
                     `
