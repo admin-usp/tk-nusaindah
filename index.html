@@ -792,6 +792,55 @@
             }
         }
 
+        async function loadPublicSchoolData() {
+            try {
+                const { data: school, error } = await supabaseClient
+                    .from('school_profile')
+                    .select('*')
+                    .limit(1)
+                    .maybeSingle();
+
+                if (error) throw error;
+                if (!school) return;
+
+                if (school.school_name) {
+                    document.title = `${school.school_name} — Pendidikan Anak Usia Dini`;
+                    const navName = document.getElementById('navSchoolName');
+                    const footerName = document.getElementById('footerSchoolName');
+                    const footerCopy = document.getElementById('footerCopyright');
+                    if (navName) navName.textContent = school.school_name;
+                    if (footerName) footerName.textContent = school.school_name;
+                    if (footerCopy) footerCopy.textContent = `© ${new Date().getFullYear()} ${school.school_name}. Sistem Informasi Manajemen Sekolah Terintegrasi.`;
+                }
+                if (school.tagline && document.getElementById('heroTagline')) {
+                    document.getElementById('heroTagline').textContent = school.tagline;
+                }
+                if (school.principal_name && document.getElementById('principalName')) {
+                    document.getElementById('principalName').textContent = school.principal_name;
+                }
+                if (school.principal_welcome && document.getElementById('principalWelcome')) {
+                    document.getElementById('principalWelcome').textContent = school.principal_welcome;
+                }
+                if (school.vision && document.getElementById('schoolVision')) {
+                    document.getElementById('schoolVision').textContent = school.vision;
+                }
+                if (school.mission && document.getElementById('schoolMission')) {
+                    document.getElementById('schoolMission').textContent = school.mission;
+                }
+                if (school.address && document.getElementById('contactAddress')) {
+                    document.getElementById('contactAddress').textContent = school.address;
+                }
+                if ((school.whatsapp || school.phone) && document.getElementById('contactPhone')) {
+                    document.getElementById('contactPhone').textContent = school.whatsapp || school.phone;
+                }
+                if (school.email && document.getElementById('contactEmail')) {
+                    document.getElementById('contactEmail').textContent = school.email;
+                }
+            } catch (err) {
+                console.warn('Menggunakan data profil sekolah default:', err.message);
+            }
+        }
+
         async function loadPublicTeachers() {
             const container = document.getElementById('publicTeachersGrid');
             try {
