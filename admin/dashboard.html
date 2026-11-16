@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — SIM Sekolah TK Terintegrasi</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- AdminLTE 3 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap4.min.css">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        
+        .nav-sidebar .nav-link.active {
+            background-color: #0284c7 !important;
+            color: #fff !important;
+        }
+        
+        .table-avatar {
+            width: 42px;
+            height: 42px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        
+        .admin-section {
+            display: none;
+        }
+        
+        .admin-section.active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+    <div class="wrapper">
+
+        <!-- NAVBAR ATAS -->
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+                </li>
+                <li class="nav-item d-none d-sm-inline-block">
+                    <a href="../index.html" target="_blank" class="nav-link text-primary font-weight-bold">
+                        <i class="fas fa-external-link-alt mr-1"></i> Lihat Website Publik
+                    </a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav ml-auto">
+                <!-- Dark Mode Toggle -->
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="toggleDarkMode" title="Mode Gelap/Terang">
+                        <i class="fas fa-moon"></i>
+                    </a>
+                </li>
+                <!-- Dropdown Akun -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle font-weight-bold" data-toggle="dropdown" href="#">
+                        <i class="fas fa-user-circle mr-1 text-primary"></i>
+                        <span id="topAdminName">Administrator</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <span class="dropdown-item-text small text-muted" id="topAdminRole">Role: Super Admin</span>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" onclick="switchAdminTab('pengaturan')" class="dropdown-item">
+                            <i class="fas fa-cog mr-2"></i> Pengaturan Sekolah
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" onclick="adminLogout()" class="dropdown-item text-danger">
+                            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                        </a>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- SIDEBAR NAVIGASI -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <a href="#" onclick="switchAdminTab('dashboard')" class="brand-link text-center">
+                <i class="fa-solid fa-shapes text-warning mr-2"></i>
+                <span class="brand-text font-weight-bold">SIM TK CERIA</span>
+            </a>
+
+            <div class="sidebar">
+                <nav class="mt-3">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link active" data-tab="dashboard" onclick="switchAdminTab('dashboard')">
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+                        <li class="nav-header">MANAJEMEN AKADEMIK</li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-tab="ppdb" onclick="switchAdminTab('ppdb')">
+                                <i class="nav-icon fas fa-user-plus"></i>
+                                <p>PPDB Online <span class="right badge badge-warning" id="badgeNewPpdb">0</span></p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-tab="siswa" onclick="switchAdminTab('siswa')">
+                                <i class="nav-icon fas fa-child"></i>
+                                <p>Data Siswa</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-tab="guru" onclick="switchAdminTab('guru')">
+                                <i class="nav-icon fas fa-chalkboard-teacher"></i>
+                                <p>Data Guru</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-tab="kelas" onclick="switchAdminTab('kelas')">
+                                <i class="nav-icon fas fa-school"></i>
+                                <p>Data Kelas</p>
+                            </a>
+                        </li>
+                        <li class="nav-header">KONTEN & PUBLIKASI</li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-tab="berita" onclick="switchAdminTab('berita')">
+                                <i class="nav-icon fas fa-newspaper"></i>
+                                <p>Berita & Artikel</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-tab="galeri" onclick="switchAdminTab('galeri')">
+                                <i class="nav-icon fas fa-images"></i>
+                                <p>Galeri Kegiatan</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-tab="pesan" onclick="switchAdminTab('pesan')">
+                                <i class="nav-icon fas fa-envelope"></i>
+                                <p>Pesan Kontak</p>
+                            </a>
+                        </li>
+                        <li class="nav-header">SISTEM & PENGATURAN</li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-tab="pengaturan" onclick="switchAdminTab('pengaturan')">
+                                <i class="nav-icon fas fa-sliders-h"></i>
+                                <p>Profil & Pengaturan</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-tab="logs" onclick="switchAdminTab('logs')">
+                                <i class="nav-icon fas fa-database"></i>
+                                <p>Backup & Activity Log</p>
+                            </a>
+                        </li>
+                        <li class="nav-item mt-3">
+                            <a href="#" onclick="adminLogout()" class="nav-link bg-danger text-white">
+                                <i class="nav-icon fas fa-sign-out-alt"></i>
+                                <p>Logout</p>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- CONTENT WRAPPER -->
+        <div class="content-wrapper">
+            <div class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1 class="m-0 font-weight-bold" id="pageHeaderTitle">Dashboard Utama</h1>
+                        </div>
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-right">
+                                <li class="breadcrumb-item"><a href="#" onclick="switchAdminTab('dashboard')">Home</a></li>
+                                <li class="breadcrumb-item active" id="breadcrumbActive">Dashboard</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <section class="content">
+                <div class="container-fluid">
+
+                    <!-- 1. TAB DASHBOARD STATISTIK -->
+                    <div id="sec-dashboard" class="admin-section active">
+                        <div class="row">
+                            <div class="col-lg-3 col-6">
+                                <div class="small-box bg-info">
+                                    <div class="inner">
+                                        <h3 id="statTotalSiswa">0</h3>
+                                        <p>Total Siswa Aktif</p>
+                                    </div>
+                                    <div class="icon"><i class="fas fa-child"></i></div>
+                                    <a href="#" onclick="switchAdminTab('siswa')" class="small-box-footer">Kelola Siswa <i class="fas fa-arrow-circle-right"></i></a>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-6">
+                                <div class="small-box bg-success">
+                                    <div class="inner">
+                                        <h3 id="statTotalGuru">0</h3>
+                                        <p>Total Tenaga Pendidik</p>
+                                    </div>
+                                    <div class="icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                                    <a href="#" onclick="switchAdminTab('guru')" class="small-box-footer">Kelola Guru <i class="fas fa-arrow-circle-right"></i></a>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-6">
+                                <div class="small-box bg-warning">
+                                    <div class="inner">
+                                        <h3 id="statTotalPpdb">0</h3>
+                                        <p>Total Pendaftar PPDB</p>
+                                    </div>
+                                    <div class="icon"><i class="fas fa-user-plus"></i></div>
+                                    <a href="#" onclick="switchAdminTab('ppdb')" class="small-box-footer">Verifikasi PPDB <i class="fas fa-arrow-circle-right"></i></a>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-6">
+                                <div class="small-box bg-primary">
+                                    <div class="inner">
+                                        <h3 id="statTotalBerita">0</h3>
+                                        <p>Berita Dipublikasikan</p>
+                                    </div>
+                                    <div class="icon"><i class="fas fa-newspaper"></i></div>
+                                    <a href="#" onclick="switchAdminTab('berita')" class="small-box-footer">Kelola Berita <i class="fas fa-arrow-circle-right"></i></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card card-primary card-outline">
+                                    <div class="card-header">
+                                        <h3 class="card-title font-weight-bold">Statistik Status Pendaftaran PPDB</h3>
+                                    </div>
+                                    <div class="card-body"><canvas id="chartPpdbStatus" height="200"></canvas></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card card-success card-outline">
+                                    <div class="card-header">
+                                        <h3 class="card-title font-weight-bold">Sebaran Peminat Kelompok Belajar</h3>
+                                    </div>
+                                    <div class="card-body"><canvas id="chartKelompokSiswa" height="200"></canvas></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. TAB MANAJEMEN PPDB ONLINE -->
+                    <div id="sec-ppdb" class="admin-section">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h3 class="card-title font-weight-bold">Data Pendaftar PPDB Online</h3>
+                                <button class="btn btn-sm btn-success ml-auto" onclick="exportTableToCSV('tablePpdb', 'Data_PPDB_TK.csv')">
+                                <i class="fas fa-file-excel mr-1"></i> Export CSV
+                            </button>
+                            </div>
+                            <div class="card-body table-responsive">
+                                <table id="tablePpdb" class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>No. Registrasi</th>
+                                            <th>Nama Calon Siswa</th>
+                                            <th>Kelompok</th>
+                                            <th>Orang Tua & Berkas</th>
+                                            <th>Status</th>
+                                            <th>Aksi & Kartu PDF</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyPpdb"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. TAB MANAJEMEN DATA SISWA -->
+                    <div id="sec-siswa" class="admin-section">
+                        <div class="card">
+                            <div class="card-header d-flex align-items-center">
+                                <h3 class="card-title font-weight-bold">Database Peserta Didik</h3>
+                                <div class="ml-auto">
+                                    <button class="btn btn-sm btn-success mr-1" onclick="exportTableToCSV('tableSiswa', 'Data_Siswa_TK.csv')">
+                                    <i class="fas fa-file-excel mr-1"></i> Export CSV
+                                </button>
+                                    <button class="btn btn-sm btn-primary" onclick="openStudentModal()">
+                                    <i class="fas fa-plus mr-1"></i> Tambah Siswa
+                                </button>
+                                </div>
+                            </div>
+                            <div class="card-body table-responsive">
+                                <table id="tableSiswa" class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Foto</th>
+                                            <th>NIS</th>
+                                            <th>Nama Lengkap</th>
+                                            <th>L/P</th>
+                                            <th>Kelompok</th>
+                                            <th>Status</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodySiswa"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. TAB MANAJEMEN DATA GURU -->
+                    <div id="sec-guru" class="admin-section">
+                        <div class="card">
+                            <div class="card-header d-flex align-items-center">
+                                <h3 class="card-title font-weight-bold">Data Guru & Tenaga Pendidik</h3>
+                                <button class="btn btn-sm btn-primary ml-auto" onclick="openTeacherModal()">
+                                <i class="fas fa-plus mr-1"></i> Tambah Guru
+                            </button>
+                            </div>
+                            <div class="card-body table-responsive">
+                                <table id="tableGuru" class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Foto</th>
+                                            <th>NIP</th>
+                                            <th>Nama Lengkap</th>
+                                            <th>Jabatan</th>
+                                            <th>Pendidikan</th>
+                                            <th>Status</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyGuru"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. TAB DATA KELAS -->
+                    <div id="sec-kelas" class="admin-section">
+                        <div class="card">
+                            <div class="card-header d-flex align-items-center">
+                                <h3 class="card-title font-weight-bold">Manajemen Kelompok Kelas</h3>
+                                <button class="btn btn-sm btn-primary ml-auto" onclick="addNewClassPrompt()">
+                                <i class="fas fa-plus mr-1"></i> Tambah Kelas
+                            </button>
+                            </div>
+                            <div class="card-body table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Nama Kelas</th>
+                                            <th>Jenjang</th>
+                                            <th>Tahun Ajaran</th>
+                                            <th>Kapasitas</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyKelas"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. TAB BERITA & ARTIKEL -->
+                    <div id="sec-berita" class="admin-section">
+                        <div class="card">
+                            <div class="card-header d-flex align-items-center">
+                                <h3 class="card-title font-weight-bold">Manajemen Berita & Artikel</h3>
+                                <button class="btn btn-sm btn-primary ml-auto" onclick="openNewsModalAdmin()">
+                                <i class="fas fa-plus mr-1"></i> Tulis Berita Baru
+                            </button>
+                            </div>
+                            <div class="card-body table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Thumbnail</th>
+                                            <th>Judul Berita</th>
+                                            <th>Status</th>
+                                            <th>Tanggal</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyBerita"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7. TAB GALERI -->
+                    <div id="sec-galeri" class="admin-section">
+                        <div class="card">
+                            <div class="card-header d-flex align-items-center">
+                                <h3 class="card-title font-weight-bold">Galeri Foto Sekolah</h3>
+                                <button class="btn btn-sm btn-primary ml-auto" onclick="uploadGalleryPhotoPrompt()">
+                                <i class="fas fa-upload mr-1"></i> Upload Foto Galeri
+                            </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="row" id="adminGalleryGrid"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 8. TAB PESAN KONTAK -->
+                    <div id="sec-pesan" class="admin-section">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title font-weight-bold">Pesan Masuk dari Pengunjung</h3>
+                            </div>
+                            <div class="card-body table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Pengirim</th>
+                                            <th>WhatsApp</th>
+                                            <th>Subjek</th>
+                                            <th>Pesan</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyPesan"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 9. TAB PENGATURAN PROFIL & WEBSITE -->
+                    <div id="sec-pengaturan" class="admin-section">
+                        <div class="card card-primary">
+                            <div class="card-header">
+                                <h3 class="card-title font-weight-bold">Pengaturan Identitas & Profil Sekolah</h3>
+                            </div>
+                            <form id="formSchoolSettings">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 form-group">
+                                            <label>Nama Sekolah</label>
+                                            <input type="text" class="form-control" name="school_name" id="setSchoolName" required>
+                                        </div>
+                                        <div class="col-md-6 form-group">
+                                            <label>Tagline Sekolah</label>
+                                            <input type="text" class="form-control" name="tagline" id="setTagline">
+                                        </div>
+                                        <div class="col-md-6 form-group">
+                                            <label>Nama Kepala Sekolah</label>
+                                            <input type="text" class="form-control" name="principal_name" id="setPrincipalName">
+                                        </div>
+                                        <div class="col-md-6 form-group">
+                                            <label>WhatsApp / Telepon Sekolah</label>
+                                            <input type="text" class="form-control" name="whatsapp" id="setWhatsapp">
+                                        </div>
+                                        <div class="col-md-12 form-group">
+                                            <label>Sambutan Kepala Sekolah</label>
+                                            <textarea class="form-control" name="principal_welcome" id="setPrincipalWelcome" rows="2"></textarea>
+                                        </div>
+                                        <div class="col-md-6 form-group">
+                                            <label>Visi Sekolah</label>
+                                            <textarea class="form-control" name="vision" id="setVision" rows="3"></textarea>
+                                        </div>
+                                        <div class="col-md-6 form-group">
+                                            <label>Misi Sekolah</label>
+                                            <textarea class="form-control" name="mission" id="setMission" rows="3"></textarea>
+                                        </div>
+                                        <div class="col-md-12 form-group">
+                                            <label>Alamat Lengkap</label>
+                                            <input type="text" class="form-control" name="address" id="setAddress">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <button type="submit" class="btn btn-primary font-weight-bold"><i class="fas fa-save mr-1"></i> Simpan Perubahan Profil</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- 10. TAB BACKUP & LOG AKTIVITAS -->
+                    <div id="sec-logs" class="admin-section">
+                        <div class="card">
+                            <div class="card-header d-flex align-items-center">
+                                <h3 class="card-title font-weight-bold">Log Aktivitas & Ekspor Cadangan Data</h3>
+                                <button class="btn btn-sm btn-warning ml-auto font-weight-bold" onclick="downloadFullDatabaseBackup()">
+                                <i class="fas fa-download mr-1"></i> Download Backup JSON
+                            </button>
+                            </div>
+                            <div class="card-body table-responsive">
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Waktu</th>
+                                            <th>Aksi</th>
+                                            <th>Tabel</th>
+                                            <th>Keterangan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyLogs"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+
+        <footer class="main-footer small">
+            <strong>SIM Sekolah TK Terintegrasi</strong> — Powered by AdminLTE 3 & Supabase Cloud.
+        </footer>
+    </div>
+
+    <!-- MODAL FORM SISWA -->
+    <div class="modal fade" id="studentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form id="formStudent">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title font-weight-bold">Form Data Siswa</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="studentId">
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label>NIS (Nomor Induk Siswa) *</label>
+                                <input type="text" class="form-control" id="stuNis" required>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>Nama Lengkap Siswa *</label>
+                                <input type="text" class="form-control" id="stuName" required>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>Jenis Kelamin *</label>
+                                <select class="form-control" id="stuGender" required>
+                                <option value="Laki-laki">Laki-laki</option>
+                                <option value="Perempuan">Perempuan</option>
+                            </select>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>Kelompok Kelas</label>
+                                <select class="form-control" id="stuClassId"></select>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>Status Siswa</label>
+                                <select class="form-control" id="stuStatus">
+                                <option value="Aktif">Aktif</option>
+                                <option value="Lulus">Lulus</option>
+                                <option value="Pindah">Pindah</option>
+                            </select>
+                            </div>
+                            <div class="col-md-12 form-group">
+                                <label>Upload Foto Siswa</label>
+                                <input type="file" class="form-control-file" id="stuPhotoFile" accept="image/*">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Data Siswa</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL FORM GURU -->
+    <div class="modal fade" id="teacherModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form id="formTeacher">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title font-weight-bold">Form Data Guru</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="teacherId">
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label>NIP / NUPTK</label>
+                                <input type="text" class="form-control" id="tchNip">
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>Nama Lengkap & Gelar *</label>
+                                <input type="text" class="form-control" id="tchName" required>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>Jabatan *</label>
+                                <input type="text" class="form-control" id="tchPosition" placeholder="Contoh: Wali Kelas TK A" required>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>Pendidikan Terakhir</label>
+                                <input type="text" class="form-control" id="tchEducation" placeholder="Contoh: S1 PG-PAUD">
+                            </div>
+                            <div class="col-md-12 form-group">
+                                <label>Deskripsi Singkat / Bio</label>
+                                <textarea class="form-control" id="tchBio" rows="2"></textarea>
+                            </div>
+                            <div class="col-md-12 form-group">
+                                <label>Upload Foto Guru</label>
+                                <input type="file" class="form-control-file" id="tchPhotoFile" accept="image/*">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-success">Simpan Data Guru</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL FORM BERITA -->
+    <div class="modal fade" id="newsModalAdmin" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form id="formNewsAdmin">
+                    <div class="modal-header bg-info text-white">
+                        <h5 class="modal-title font-weight-bold">Publikasi Berita / Artikel</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Judul Berita *</label>
+                            <input type="text" class="form-control" id="newsTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Ringkasan Singkat</label>
+                            <input type="text" class="form-control" id="newsSummary">
+                        </div>
+                        <div class="form-group">
+                            <label>Isi Berita Lengkap *</label>
+                            <textarea class="form-control" id="newsContent" rows="5" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Thumbnail Berita</label>
+                            <input type="file" class="form-control-file" id="newsThumbnailFile" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-info">Publikasikan Berita</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../assets/js/supabase.js"></script>
+    <script src="../assets/js/ppdb-card.js"></script>
+
+    <script>
+        let currentAdminProfile = null;
+        let ppdbChartInstance = null;
+        let groupChartInstance = null;
+
+        document.addEventListener('DOMContentLoaded', async() => {
+            const auth = await requireAdminAuth();
+            if (!auth) return;
+
+            currentAdminProfile = auth.profile;
+            document.getElementById('topAdminName').textContent = currentAdminProfile.full_name;
+            document.getElementById('topAdminRole').textContent = `Role: ${currentAdminProfile.role.toUpperCase()}`;
+
+            await refreshAllDashboardData();
+        });
+
+        // Navigasi Tab Single-Workspace AdminLTE
+        function switchAdminTab(tabName) {
+            document.querySelectorAll('.admin-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-sidebar .nav-link').forEach(el => el.classList.remove('active'));
+
+            const targetSec = document.getElementById(`sec-${tabName}`);
+            if (targetSec) targetSec.classList.add('active');
+
+            const activeLink = document.querySelector(`.nav-sidebar .nav-link[data-tab="${tabName}"]`);
+            if (activeLink) activeLink.classList.add('active');
+
+            document.getElementById('pageHeaderTitle').textContent = tabName.toUpperCase();
+            document.getElementById('breadcrumbActive').textContent = tabName;
+        }
+
+        // Dark Mode Toggle
+        document.getElementById('toggleDarkMode').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.body.classList.toggle('dark-mode');
+        });
+
+        async function refreshAllDashboardData() {
+            await Promise.all([
+                loadPpdbAdmin(),
+                loadStudentsAdmin(),
+                loadTeachersAdmin(),
+                loadClassesAdmin(),
+                loadNewsAdmin(),
+                loadGalleryAdmin(),
+                loadMessagesAdmin(),
+                loadSchoolSettingsAdmin(),
+                loadActivityLogsAdmin()
+            ]);
+        }
+
+        // ==================== 1. PPDB & DASHBOARD CHARTS ====================
+        async function loadPpdbAdmin() {
+            const {
+                data: list
+            } = await supabaseClient.from('admissions').select('*').order('created_at', {
+                ascending: false
+            });
+            const admissions = list || [];
+            window._adminAdmissionsCache = admissions;
+
+            document.getElementById('statTotalPpdb').textContent = admissions.length;
+            const waitingCount = admissions.filter(a => a.status === 'Menunggu').length;
+            document.getElementById('badgeNewPpdb').textContent = waitingCount;
+
+            const tbody = document.getElementById('tbodyPpdb');
+            tbody.innerHTML = admissions.map((a, idx) => {
+                        const badge = a.status === 'Diterima' ? 'success' : (a.status === 'Ditolak' ? 'danger' : (a.status === 'Verifikasi' ? 'info' : 'warning'));
+                        const hasDocs = a.birth_certificate_url || a.family_card_url;
+                        return `
+                <tr>
+                    <td class="font-weight-bold">${sanitizeHTML(a.registration_number)}</td>
+                    <td>${sanitizeHTML(a.child_full_name)}<br><small class="text-muted">${sanitizeHTML(a.gender)} | ${sanitizeHTML(a.birth_place)}</small></td>
+                    <td><span class="badge badge-primary">${sanitizeHTML(a.target_group)}</span></td>
+                    <td>
+                        Ayah: ${sanitizeHTML(a.father_name)}<br>
+                        <small>WA: ${sanitizeHTML(a.parent_whatsapp)}</small><br>
+                        ${hasDocs ? `<button class="btn btn-xs btn-outline-secondary mt-1" onclick="viewPpdbDocuments(${idx})"><i class="fas fa-folder-open mr-1"></i>Lihat Berkas</button>` : '<small class="text-muted">Tanpa lampiran</small>'}
+                    </td>
+                    <td><span class="badge badge-${badge}">${sanitizeHTML(a.status)}</span></td>
+                    <td>
+                        <div class="btn-group btn-group-sm mb-1">
+                            <button class="btn btn-primary" onclick="printPpdbParticipantCard('${sanitizeHTML(a.registration_number)}')" title="Cetak Kartu Peserta PDF"><i class="fas fa-print"></i></button>
+                            <button class="btn btn-info" onclick="updatePpdbStatus('${a.id}', 'Verifikasi')" title="Verifikasi"><i class="fas fa-search"></i></button>
+                            <button class="btn btn-success" onclick="updatePpdbStatus('${a.id}', 'Diterima')" title="Terima & Konversi Siswa"><i class="fas fa-check"></i></button>
+                            <button class="btn btn-warning" onclick="updatePpdbStatus('${a.id}', 'Ditolak')" title="Tolak"><i class="fas fa-times"></i></button>
+                            <button class="btn btn-danger" onclick="deleteRecord('admissions', '${a.id}')" title="Hapus"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        renderCharts(admissions);
+    }
+
+    async function viewPpdbDocuments(idx) {
+        const item = window._adminAdmissionsCache[idx];
+        if (!item) return;
+
+        let linksHtml = '<div class="text-left small">';
+        if (item.birth_certificate_url) {
+            const { data: aktaSigned } = await supabaseClient.storage.from('ppdb-documents').createSignedUrl(item.birth_certificate_url, 300);
+            if (aktaSigned?.signedUrl) {
+                linksHtml += `<p><a href="${aktaSigned.signedUrl}" target="_blank" class="btn btn-sm btn-outline-primary btn-block"><i class="fas fa-file-alt mr-1"></i> Buka Scan Akta Kelahiran</a></p>`;
+            }
+        }
+        if (item.family_card_url) {
+            const { data: kkSigned } = await supabaseClient.storage.from('ppdb-documents').createSignedUrl(item.family_card_url, 300);
+            if (kkSigned?.signedUrl) {
+                linksHtml += `<p><a href="${kkSigned.signedUrl}" target="_blank" class="btn btn-sm btn-outline-success btn-block"><i class="fas fa-id-card mr-1"></i> Buka Scan Kartu Keluarga (KK)</a></p>`;
+            }
+        }
+        linksHtml += '</div>';
+
+        Swal.fire({
+            title: `Berkas PPDB: ${item.child_full_name}`,
+            html: linksHtml,
+            confirmButtonText: 'Tutup'
+        });
+    }
+
+    async function updatePpdbStatus(id, newStatus) {
+        const admission = window._adminAdmissionsCache.find(a => a.id === id);
+        const { value: formValues } = await Swal.fire({
+            title: `Ubah Status ke "${newStatus}"?`,
+            html: `
+                <input id="swalAdminNotes" class="swal2-input" placeholder="Catatan untuk orang tua (opsional)">
+                ${newStatus === 'Diterima' ? `
+                <div class="form-check text-left mt-3 px-4">
+                    <input class="form-check-input" type="checkbox" id="swalAutoConvertStudent" checked>
+                    <label class="form-check-label small font-weight-bold text-success" for="swalAutoConvertStudent">
+                        Otomatis daftarkan ke Data Siswa Aktif
+                    </label>
+                </div>` : ''}
+            `,
+            focusConfirm: false,
+            showCancelButton: true,
+            preConfirm: () => ({
+                notes: document.getElementById('swalAdminNotes').value,
+                autoConvert: document.getElementById('swalAutoConvertStudent')?.checked || false
+            })
+        });
+
+        if (!formValues) return;
+
+        const { error } = await supabaseClient.from('admissions').update({
+            status: newStatus,
+            admin_notes: formValues.notes
+        }).eq('id', id);
+
+        if (error) return Swal.fire('Error', error.message, 'error');
+
+        // Auto-convert ke tabel students jika diterima
+        if (newStatus === 'Diterima' && formValues.autoConvert && admission) {
+            const autoNis = `NIS-${new Date().getFullYear()}${Math.floor(100 + Math.random() * 900)}`;
+            await supabaseClient.from('students').insert([{
+                nis: autoNis,
+                registration_number: admission.registration_number,
+                full_name: admission.child_full_name,
+                nik: admission.child_nik,
+                gender: admission.gender,
+                birth_place: admission.birth_place,
+                birth_date: admission.birth_date,
+                address: admission.address,
+                photo_url: admission.photo_url,
+                academic_year: admission.academic_year,
+                status: 'Aktif'
+            }]);
+            await logAdminActivity('AUTO_CONVERT_STUDENT', 'students', autoNis, `Konversi PPDB ${admission.registration_number} menjadi Siswa Aktif`);
+        }
+
+        await logAdminActivity('UPDATE_PPDB', 'admissions', id, `Status PPDB diubah menjadi ${newStatus}`);
+        Swal.fire('Berhasil', `Status pendaftaran diperbarui menjadi ${newStatus}`, 'success');
+        refreshAllDashboardData();
+    }
+
+    function renderCharts(admissions) {
+        const statusCounts = {
+            Menunggu: admissions.filter(a => a.status === 'Menunggu').length,
+            Verifikasi: admissions.filter(a => a.status === 'Verifikasi').length,
+            Diterima: admissions.filter(a => a.status === 'Diterima').length,
+            Ditolak: admissions.filter(a => a.status === 'Ditolak').length
+        };
+
+        const groupCounts = {
+            KB: admissions.filter(a => a.target_group === 'KB').length,
+            'TK A': admissions.filter(a => a.target_group === 'TK A').length,
+            'TK B': admissions.filter(a => a.target_group === 'TK B').length
+        };
+
+        if (ppdbChartInstance) ppdbChartInstance.destroy();
+        ppdbChartInstance = new Chart(document.getElementById('chartPpdbStatus'), {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(statusCounts),
+                datasets: [{ data: Object.values(statusCounts), backgroundColor: ['#facc15', '#38bdf8', '#22c55e', '#ef4444'] }]
+            }
+        });
+
+        if (groupChartInstance) groupChartInstance.destroy();
+        groupChartInstance = new Chart(document.getElementById('chartKelompokSiswa'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(groupCounts),
+                datasets: [{ label: 'Jumlah Pendaftar', data: Object.values(groupCounts), backgroundColor: '#0284c7' }]
+            }
+        });
+    }
+
+    // ==================== 2. CRUD DATA SISWA ====================
+    async function loadStudentsAdmin() {
+        const { data: students } = await supabaseClient.from('students').select('*, classes(class_name)').order('created_at', { ascending: false });
+        const list = students || [];
+        document.getElementById('statTotalSiswa').textContent = list.filter(s => s.status === 'Aktif').length;
+
+        document.getElementById('tbodySiswa').innerHTML = list.map(s => `
+            <tr>
+                <td><img src="${s.photo_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s.full_name)}" class="table-avatar"></td>
+                <td>${sanitizeHTML(s.nis || '-')}</td>
+                <td class="font-weight-bold">${sanitizeHTML(s.full_name)}</td>
+                <td>${sanitizeHTML(s.gender)}</td>
+                <td>${sanitizeHTML(s.classes?.class_name || 'Belum diatur')}</td>
+                <td><span class="badge badge-success">${sanitizeHTML(s.status)}</span></td>
+                <td>
+                    <button class="btn btn-xs btn-danger" onclick="deleteRecord('students', '${s.id}')"><i class="fas fa-trash"></i> Hapus</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function openStudentModal() {
+        document.getElementById('formStudent').reset();
+        document.getElementById('studentId').value = '';
+        $('#studentModal').modal('show');
+    }
+
+    document.getElementById('formStudent').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const file = document.getElementById('stuPhotoFile').files[0];
+        const photoUrl = file ? await uploadFileToCloud(file, 'school-public', 'students') : null;
+
+        const payload = {
+            nis: document.getElementById('stuNis').value,
+            full_name: document.getElementById('stuName').value,
+            gender: document.getElementById('stuGender').value,
+            class_id: document.getElementById('stuClassId').value || null,
+            status: document.getElementById('stuStatus').value,
+            ...(photoUrl && { photo_url: photoUrl })
+        };
+
+        const { error } = await supabaseClient.from('students').insert([payload]);
+        if (error) return Swal.fire('Gagal', error.message, 'error');
+
+        $('#studentModal').modal('hide');
+        await logAdminActivity('CREATE_STUDENT', 'students', payload.nis, `Menambahkan siswa ${payload.full_name}`);
+        Swal.fire('Tersimpan', 'Data siswa berhasil ditambahkan.', 'success');
+        loadStudentsAdmin();
+    });
+
+    // ==================== 3. CRUD DATA GURU ====================
+    async function loadTeachersAdmin() {
+        const { data: teachers } = await supabaseClient.from('teachers').select('*').order('created_at', { ascending: false });
+        const list = teachers || [];
+        document.getElementById('statTotalGuru').textContent = list.length;
+
+        document.getElementById('tbodyGuru').innerHTML = list.map(t => `
+            <tr>
+                <td><img src="${t.photo_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(t.full_name)}" class="table-avatar"></td>
+                <td>${sanitizeHTML(t.nip || '-')}</td>
+                <td class="font-weight-bold">${sanitizeHTML(t.full_name)}</td>
+                <td>${sanitizeHTML(t.position)}</td>
+                <td>${sanitizeHTML(t.education || '-')}</td>
+                <td><span class="badge badge-info">${sanitizeHTML(t.status)}</span></td>
+                <td>
+                    <button class="btn btn-xs btn-danger" onclick="deleteRecord('teachers', '${t.id}')"><i class="fas fa-trash"></i> Hapus</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function openTeacherModal() {
+        document.getElementById('formTeacher').reset();
+        $('#teacherModal').modal('show');
+    }
+
+    document.getElementById('formTeacher').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const file = document.getElementById('tchPhotoFile').files[0];
+        const photoUrl = file ? await uploadFileToCloud(file, 'school-public', 'teachers') : null;
+
+        const payload = {
+            nip: document.getElementById('tchNip').value,
+            full_name: document.getElementById('tchName').value,
+            position: document.getElementById('tchPosition').value,
+            education: document.getElementById('tchEducation').value,
+            bio: document.getElementById('tchBio').value,
+            photo_url: photoUrl,
+            status: 'Aktif'
+        };
+
+        const { error } = await supabaseClient.from('teachers').insert([payload]);
+        if (error) return Swal.fire('Gagal', error.message, 'error');
+
+        $('#teacherModal').modal('hide');
+        await logAdminActivity('CREATE_TEACHER', 'teachers', payload.full_name, `Menambahkan guru ${payload.full_name}`);
+        Swal.fire('Tersimpan', 'Data guru berhasil ditambahkan.', 'success');
+        loadTeachersAdmin();
+    });
+
+    // ==================== 4. DATA KELAS ====================
+    async function loadClassesAdmin() {
+        const { data: classes } = await supabaseClient.from('classes').select('*');
+        const list = classes || [];
+        document.getElementById('stuClassId').innerHTML = `<option value="">-- Pilih Kelas --</option>` +
+            list.map(c => `<option value="${c.id}">${sanitizeHTML(c.class_name)} (${sanitizeHTML(c.level)})</option>`).join('');
+
+        document.getElementById('tbodyKelas').innerHTML = list.map(c => `
+            <tr>
+                <td class="font-weight-bold">${sanitizeHTML(c.class_name)}</td>
+                <td>${sanitizeHTML(c.level)}</td>
+                <td>${sanitizeHTML(c.academic_year)}</td>
+                <td>${c.capacity} Siswa</td>
+                <td><button class="btn btn-xs btn-danger" onclick="deleteRecord('classes', '${c.id}')"><i class="fas fa-trash"></i></button></td>
+            </tr>
+        `).join('');
+    }
+
+    async function addNewClassPrompt() {
+        const { value: formValues } = await Swal.fire({
+            title: 'Tambah Kelompok Kelas',
+            html:
+                '<input id="swalClassName" class="swal2-input" placeholder="Nama Kelas (misal: TK A - Bintang)">' +
+                '<select id="swalClassLevel" class="swal2-input"><option value="KB">KB</option><option value="TK A">TK A</option><option value="TK B">TK B</option></select>',
+            focusConfirm: false,
+            preConfirm: () => [document.getElementById('swalClassName').value, document.getElementById('swalClassLevel').value]
+        });
+
+        if (formValues && formValues[0]) {
+            await supabaseClient.from('classes').insert([{ class_name: formValues[0], level: formValues[1], academic_year: '2026/2027' }]);
+            loadClassesAdmin();
+        }
+    }
+
+    // ==================== 5. BERITA & GALERI ====================
+    async function loadNewsAdmin() {
+        const { data: news } = await supabaseClient.from('news').select('*').order('created_at', { ascending: false });
+        const list = news || [];
+        document.getElementById('statTotalBerita').textContent = list.length;
+
+        document.getElementById('tbodyBerita').innerHTML = list.map(n => `
+            <tr>
+                <td><img src="${n.thumbnail_url || 'https://via.placeholder.com/60'}" width="60" class="rounded"></td>
+                <td class="font-weight-bold">${sanitizeHTML(n.title)}</td>
+                <td><span class="badge badge-success">${sanitizeHTML(n.status)}</span></td>
+                <td>${new Date(n.published_at).toLocaleDateString('id-ID')}</td>
+                <td><button class="btn btn-xs btn-danger" onclick="deleteRecord('news', '${n.id}')"><i class="fas fa-trash"></i> Hapus</button></td>
+            </tr>
+        `).join('');
+    }
+
+    function openNewsModalAdmin() {
+        document.getElementById('formNewsAdmin').reset();
+        $('#newsModalAdmin').modal('show');
+    }
+
+    document.getElementById('formNewsAdmin').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const file = document.getElementById('newsThumbnailFile').files[0];
+        const thumbUrl = file ? await uploadFileToCloud(file, 'school-public', 'news') : null;
+        const title = document.getElementById('newsTitle').value;
+        const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
+
+        const { error } = await supabaseClient.from('news').insert([{
+            title,
+            slug,
+            summary: document.getElementById('newsSummary').value,
+            content: document.getElementById('newsContent').value,
+            thumbnail_url: thumbUrl,
+            author_id: currentAdminProfile.id,
+            status: 'published'
+        }]);
+
+        if (error) return Swal.fire('Gagal', error.message, 'error');
+        $('#newsModalAdmin').modal('hide');
+        Swal.fire('Dipublikasikan', 'Berita baru telah tayang di halaman depan.', 'success');
+        loadNewsAdmin();
+    });
+
+    async function loadGalleryAdmin() {
+        const { data: items } = await supabaseClient.from('gallery_items').select('*').order('created_at', { ascending: false });
+        document.getElementById('adminGalleryGrid').innerHTML = (items || []).map(item => `
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <img src="${item.media_url}" class="card-img-top" style="height: 160px; object-fit: cover;">
+                    <div class="card-body p-2 d-flex justify-content-between align-items-center">
+                        <small class="text-truncate">${sanitizeHTML(item.caption || 'Foto Kegiatan')}</small>
+                        <button class="btn btn-xs btn-danger" onclick="deleteRecord('gallery_items', '${item.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function uploadGalleryPhotoPrompt() {
+        const { value: file } = await Swal.fire({
+            title: 'Pilih Foto Dokumentasi',
+            input: 'file',
+            inputAttributes: { accept: 'image/*' }
+        });
+        if (!file) return;
+
+        const { value: caption } = await Swal.fire({ title: 'Keterangan Foto', input: 'text' });
+        const url = await uploadFileToCloud(file, 'school-public', 'gallery');
+        await supabaseClient.from('gallery_items').insert([{ media_url: url, caption: caption || 'Kegiatan Sekolah' }]);
+        Swal.fire('Berhasil', 'Foto berhasil ditambahkan ke galeri.', 'success');
+        loadGalleryAdmin();
+    }
+
+    // ==================== 6. PESAN, PENGATURAN & LOG ====================
+    async function loadMessagesAdmin() {
+        const { data: msgs } = await supabaseClient.from('contact_messages').select('*').order('created_at', { ascending: false });
+        document.getElementById('tbodyPesan').innerHTML = (msgs || []).map(m => `
+            <tr>
+                <td class="font-weight-bold">${sanitizeHTML(m.sender_name)}</td>
+                <td>${sanitizeHTML(m.sender_phone)}</td>
+                <td>${sanitizeHTML(m.subject)}</td>
+                <td>${sanitizeHTML(m.message)}</td>
+                <td><button class="btn btn-xs btn-danger" onclick="deleteRecord('contact_messages', '${m.id}')"><i class="fas fa-trash"></i></button></td>
+            </tr>
+        `).join('');
+    }
+
+    async function loadSchoolSettingsAdmin() {
+        const { data: p } = await supabaseClient.from('school_profile').select('*').limit(1).single();
+        if (!p) return;
+        window._schoolProfileId = p.id;
+        document.getElementById('setSchoolName').value = p.school_name || '';
+        document.getElementById('setTagline').value = p.tagline || '';
+        document.getElementById('setPrincipalName').value = p.principal_name || '';
+        document.getElementById('setWhatsapp').value = p.whatsapp || '';
+        document.getElementById('setPrincipalWelcome').value = p.principal_welcome || '';
+        document.getElementById('setVision').value = p.vision || '';
+        document.getElementById('setMission').value = p.mission || '';
+        document.getElementById('setAddress').value = p.address || '';
+    }
+
+    document.getElementById('formSchoolSettings').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const payload = Object.fromEntries(formData.entries());
+        const { error } = await supabaseClient.from('school_profile').update(payload).eq('id', window._schoolProfileId);
+        if (error) return Swal.fire('Error', error.message, 'error');
+        Swal.fire('Tersimpan', 'Profil sekolah diperbarui dan langsung sinkron ke halaman publik.', 'success');
+    });
+
+    async function loadActivityLogsAdmin() {
+        const { data: logs } = await supabaseClient.from('activity_logs').select('*').order('created_at', { ascending: false }).limit(30);
+        document.getElementById('tbodyLogs').innerHTML = (logs || []).map(l => `
+            <tr>
+                <td>${new Date(l.created_at).toLocaleString('id-ID')}</td>
+                <td><span class="badge badge-secondary">${sanitizeHTML(l.action)}</span></td>
+                <td>${sanitizeHTML(l.table_name)}</td>
+                <td>${sanitizeHTML(l.details)}</td>
+            </tr>
+        `).join('');
+    }
+
+    // ==================== HELPER DELETE, EXPORT CSV & BACKUP ====================
+    async function deleteRecord(table, id) {
+        const res = await Swal.fire({
+            title: 'Hapus data ini secara permanen?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Ya, Hapus!'
+        });
+        if (!res.isConfirmed) return;
+
+        const { error } = await supabaseClient.from(table).delete().eq('id', id);
+        if (error) return Swal.fire('Gagal', error.message, 'error');
+
+        await logAdminActivity('DELETE', table, id, `Menghapus data dari tabel ${table}`);
+        Swal.fire('Terhapus', 'Data berhasil dihapus dari database.', 'success');
+        refreshAllDashboardData();
+    }
+
+    function exportTableToCSV(tableId, filename) {
+        const rows = document.querySelectorAll(`#${tableId} tr`);
+        const csv = Array.from(rows).map(row =>
+            Array.from(row.querySelectorAll('th, td'))
+                .slice(0, -1)
+                .map(col => `"${col.innerText.replace(/\n/g, ' ').trim()}"`)
+                .join(',')
+        ).join('\n');
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+    }
+
+    async function downloadFullDatabaseBackup() {
+        const [students, teachers, admissions, news] = await Promise.all([
+            supabaseClient.from('students').select('*'),
+            supabaseClient.from('teachers').select('*'),
+            supabaseClient.from('admissions').select('*'),
+            supabaseClient.from('news').select('*')
+        ]);
+
+        const backupObj = {
+            exported_at: new Date().toISOString(),
+            students: students.data,
+            teachers: teachers.data,
+            admissions: admissions.data,
+            news: news.data
+        };
+
+        const blob = new Blob([JSON.stringify(backupObj, null, 2)], { type: 'application/json' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Backup_SIM_TK_${new Date().toISOString().slice(0,10)}.json`;
+        link.click();
+    }
+    </script>
+
+    <script>
+        function exportTableToCSV(tableId, filename) {
+            const rows = document.querySelectorAll(`#${tableId} tr`);
+            const csv = Array.from(rows).map(row => Array.from(row.querySelectorAll('th, td')).slice(0, -1).map(col => `"${col.innerText.replace(/\n/g, ' ').trim()}"`)
+                .join(',')).join('\n');
+            const blob = new Blob([csv], {
+                type: 'text/csv;charset=utf-8;'
+            });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+        }
+        async function downloadFullDatabaseBackup() {
+            const [students, teachers, admissions, news] = await Promise.all([supabaseClient.from('students').select('*'), supabaseClient.from('teachers').select('*'), supabaseClient.from('admissions').select('*'), supabaseClient.from('news').select('*')]);
+            const
+                backupObj = {
+                    exported_at: new Date().toISOString(),
+                    students: students.data,
+                    teachers: teachers.data,
+                    admissions: admissions.data,
+                    news: news.data
+                };
+            const blob = new Blob([JSON.stringify(backupObj, null, 2)], {
+                type: 'application/json'
+            });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Backup_SIM_TK_${new Date().toISOString().slice(0,10)}.json`;
+            link.click();
+        }
+    </script>
+</body>
+
+</html>

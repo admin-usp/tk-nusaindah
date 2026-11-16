@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistem Informasi Sekolah Taman Kanak-Kanak - Pendidikan Anak Usia Dini Modern, Ceria, dan Berkarakter.">
+    <title>TK NUSA INDAH — Pendidikan Anak Usia Dini</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <style>
+         :root {
+            --sky-blue: #38bdf8;
+            --sky-light: #e0f2fe;
+            --pastel-green: #86efac;
+            --green-soft: #dcfce7;
+            --cheerful-yellow: #facc15;
+            --yellow-soft: #fef9c3;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+        }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--text-dark);
+            background-color: #ffffff;
+            scroll-behavior: smooth;
+        }
+        
+        h1,
+        h2,
+        h3,
+        h4,
+        .navbar-brand {
+            font-family: 'Fredoka', sans-serif;
+        }
+        
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(56, 189, 248, 0.08);
+        }
+        
+        .nav-link {
+            font-weight: 600;
+            color: var(--text-dark);
+            padding: 0.5rem 1rem !important;
+            border-radius: 50px;
+            transition: all 0.25s ease;
+        }
+        
+        .nav-link:hover,
+        .nav-link.active {
+            background-color: var(--sky-light);
+            color: #0284c7;
+        }
+        
+        .btn-ppdb {
+            background: linear-gradient(135deg, #facc15, #f59e0b);
+            color: #1e293b;
+            font-weight: 700;
+            border-radius: 50px;
+            padding: 0.6rem 1.5rem;
+            border: none;
+            box-shadow: 0 4px 14px rgba(250, 204, 21, 0.4);
+            transition: transform 0.2s;
+        }
+        
+        .btn-ppdb:hover {
+            transform: translateY(-2px);
+            color: #0f172a;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, var(--sky-light) 0%, #ffffff 50%, var(--green-soft) 100%);
+            padding: 110px 0 80px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-badge {
+            background-color: var(--yellow-soft);
+            color: #b45309;
+            font-weight: 700;
+            padding: 8px 18px;
+            border-radius: 50px;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        
+        .section-padding {
+            padding: 80px 0;
+        }
+        
+        .section-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-playful {
+            border: none;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .card-playful:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 36px rgba(56, 189, 248, 0.15);
+        }
+        
+        .icon-circle {
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 1.25rem;
+        }
+        
+        .bg-sky-soft {
+            background-color: var(--sky-light);
+            color: #0284c7;
+        }
+        
+        .bg-green-soft {
+            background-color: var(--green-soft);
+            color: #16a34a;
+        }
+        
+        .bg-yellow-soft {
+            background-color: var(--yellow-soft);
+            color: #ca8a04;
+        }
+        
+        .teacher-avatar {
+            width: 110px;
+            height: 110px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid var(--sky-light);
+        }
+        
+        .gallery-img {
+            height: 220px;
+            object-fit: cover;
+            width: 100%;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .gallery-img:hover {
+            transform: scale(1.04);
+        }
+        
+        footer {
+            background-color: #0f172a;
+            color: #cbd5e1;
+            padding-top: 60px;
+            padding-bottom: 30px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2 fs-4 fw-bold text-primary" href="#beranda">
+                <span class="bg-warning text-dark rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                    <i class="fa-solid fa-shapes"></i>
+                </span>
+                <span id="navSchoolName">TK NUSA INDAH</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-1">
+                    <li class="nav-item"><a class="nav-link active" href="#beranda">Beranda</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#profil">Profil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#program">Program</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#guru">Data Guru</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#berita">Berita</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#galeri">Galeri</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#kontak">Kontak</a></li>
+                </ul>
+                <div class="d-flex gap-2">
+                    <a href="#ppdb" class="btn btn-ppdb"><i class="fa-solid fa-user-plus me-1"></i> PPDB Online</a>
+                    <a href="admin/login.html" class="btn btn-outline-primary rounded-pill px-3 fw-semibold" title="Login Admin">
+                        <i class="fa-solid fa-lock"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section id="beranda" class="hero-section">
+        <div class="container">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6">
+                    <span class="hero-badge"><i class="fa-solid fa-star me-1"></i> Penerimaan Peserta Didik Baru <span id="heroAcademicYear">2026/2027</span></span>
+                    <h1 class="display-4 fw-bold mb-3" id="heroTitle">Tumbuh Cerdas, Ceria, dan Berakhlak Mulia</h1>
+                    <p class="lead text-muted mb-4" id="heroTagline">Lingkungan belajar anak usia dini yang aman, penuh kasih sayang, serta menstimulasi kreativitas dan kemandirian buah hati Anda.</p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="#ppdb" class="btn btn-ppdb btn-lg px-4"><i class="fa-solid fa-pencil me-2"></i>Daftar PPDB Sekarang</a>
+                        <a href="#profil" class="btn btn-outline-primary btn-lg rounded-pill px-4 fw-semibold">Profil Sekolah</a>
+                    </div>
+                </div>
+                <div class="col-lg-6 text-center">
+                    <img id="heroBannerImg" src="https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=800&q=80" alt="Aktivitas Belajar Anak TK" class="img-fluid rounded-4 shadow-lg border border-4 border-white">
+                </div>
+            </div>
+
+            <!-- KEUNGGULAN SEKOLAH -->
+            <div class="row g-4 mt-5">
+                <div class="col-md-4">
+                    <div class="card card-playful p-4 h-100">
+                        <div class="icon-circle bg-sky-soft"><i class="fa-solid fa-puzzle-piece"></i></div>
+                        <h4 class="fw-bold">Belajar Sambil Bermain</h4>
+                        <p class="text-muted mb-0">Kurikulum Merdeka PAUD yang dirancang sesuai tahap perkembangan motorik, kognitif, dan sosial emosional anak.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-playful p-4 h-100">
+                        <div class="icon-circle bg-green-soft"><i class="fa-solid fa-heart"></i></div>
+                        <h4 class="fw-bold">Pendidik Tersertifikasi</h4>
+                        <p class="text-muted mb-0">Didampingi guru-guru sabar, berpengalaman, dan berdedikasi tinggi dalam mendidik anak usia dini.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-playful p-4 h-100">
+                        <div class="icon-circle bg-yellow-soft"><i class="fa-solid fa-shield-halved"></i></div>
+                        <h4 class="fw-bold">Lingkungan Aman & Nyaman</h4>
+                        <p class="text-muted mb-0">Ruang kelas ber-AC, area bermain edukatif indoor/outdoor yang higienis, dan pengawasan penuh.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROFIL SEKOLAH & SAMBUTAN -->
+    <section id="profil" class="section-padding">
+        <div class="container">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-5 text-center">
+                    <img id="principalPhoto" src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=500&q=80" alt="Kepala Sekolah" class="img-fluid rounded-4 shadow mb-3" style="max-height: 380px; object-fit: cover;">
+                    <h5 class="fw-bold mb-0" id="principalName">Hj. Siti Aminah, S.Pd.AUD</h5>
+                    <small class="text-muted">Kepala Sekolah</small>
+                </div>
+                <div class="col-lg-7">
+                    <span class="text-primary fw-bold text-uppercase small">Tentang Kami</span>
+                    <h2 class="section-title">Sambutan Kepala Sekolah & Profil</h2>
+                    <p class="text-muted" id="principalWelcome">Selamat datang di website resmi sekolah kami. Kami berkomitmen menghadirkan pendidikan anak usia dini yang menyenangkan untuk membangun pondasi karakter anak sejak usia emas.</p>
+
+                    <div class="row g-3 mt-3">
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-4 bg-sky-soft h-100">
+                                <h5 class="fw-bold text-dark"><i class="fa-solid fa-eye me-2 text-primary"></i>Visi Sekolah</h5>
+                                <p class="small text-dark mb-0" id="schoolVision">Mewujudkan generasi anak usia dini yang cerdas, ceria, berakhlak mulia, dan mandiri.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-4 bg-green-soft h-100">
+                                <h5 class="fw-bold text-dark"><i class="fa-solid fa-bullseye me-2 text-success"></i>Misi Sekolah</h5>
+                                <p class="small text-dark mb-0" id="schoolMission">Menyelenggarakan pembelajaran aktif berbasis bermain dan menanamkan budi pekerti luhur.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROGRAM PENDIDIKAN -->
+    <section id="program" class="section-padding bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <span class="text-primary fw-bold text-uppercase small">Kurikulum & Kelas</span>
+                <h2 class="section-title">Program Pendidikan Anak</h2>
+                <p class="text-muted">Kelompok belajar disesuaikan dengan rentang usia perkembangan anak</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card card-playful p-4 h-100 border-top border-4 border-info">
+                        <span class="badge bg-info text-dark w-auto align-self-start mb-2">Usia 3 - 4 Tahun</span>
+                        <h4 class="fw-bold">Kelompok Bermain (KB)</h4>
+                        <p class="text-muted small">Fokus pada stimulasi sensorik, motorik kasar & halus, kemampuan bersosialisasi, dan kemandirian dasar.</p>
+                        <ul class="small text-muted ps-3 mb-0">
+                            <li>Sensory Play & Motorik</li>
+                            <li>Pengenalan Bahasa & Lagu</li>
+                            <li>Pembiasaan Ibadah & Sopan Santun</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-playful p-4 h-100 border-top border-4 border-success">
+                        <span class="badge bg-success w-auto align-self-start mb-2">Usia 4 - 5 Tahun</span>
+                        <h4 class="fw-bold">Taman Kanak-Kanak A (TK A)</h4>
+                        <p class="text-muted small">Mengembangkan kreativitas, rasa ingin tahu, komunikasi aktif, dan pengenalan konsep pra-akademik secara menyenangkan.</p>
+                        <ul class="small text-muted ps-3 mb-0">
+                            <li>Eksplorasi Sains Sederhana</li>
+                            <li>Seni Musik, Tari & Melukis</li>
+                            <li>Pengenalan Huruf & Angka Kreatif</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-playful p-4 h-100 border-top border-4 border-warning">
+                        <span class="badge bg-warning text-dark w-auto align-self-start mb-2">Usia 5 - 6 Tahun</span>
+                        <h4 class="fw-bold">Taman Kanak-Kanak B (TK B)</h4>
+                        <p class="text-muted small">Persiapan transisi PAUD ke SD yang menyenangkan dengan penguatan karakter, literasi, numerasi dasar, dan kepercayaan diri.</p>
+                        <ul class="small text-muted ps-3 mb-0">
+                            <li>Transisi PAUD-SD Menyenangkan</li>
+                            <li>Ekstrakurikuler Drumband & Mewarnai</li>
+                            <li>Proyek Penguatan Profil Pelajar Pancasila</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DATA GURU -->
+    <section id="guru" class="section-padding">
+        <div class="container">
+            <div class="text-center mb-5">
+                <span class="text-primary fw-bold text-uppercase small">Pendidik Kami</span>
+                <h2 class="section-title">Tenaga Pendidik & Staf</h2>
+                <p class="text-muted">Mengenal lebih dekat para pendidik yang membimbing buah hati Anda</p>
+            </div>
+            <div class="row g-4" id="publicTeachersGrid">
+                <div class="col-12 text-center py-4">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="text-muted mt-2">Memuat data tenaga pendidik...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- BERITA & ARTIKEL -->
+    <section id="berita" class="section-padding bg-light">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-end mb-5 flex-wrap gap-3">
+                <div>
+                    <span class="text-primary fw-bold text-uppercase small">Kabar Sekolah</span>
+                    <h2 class="section-title mb-0">Berita & Kegiatan Terbaru</h2>
+                </div>
+            </div>
+            <div class="row g-4" id="publicNewsGrid">
+                <div class="col-12 text-center py-4">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- GALERI KEGIATAN -->
+    <section id="galeri" class="section-padding">
+        <div class="container">
+            <div class="text-center mb-5">
+                <span class="text-primary fw-bold text-uppercase small">Dokumentasi</span>
+                <h2 class="section-title">Galeri Keceriaan Siswa</h2>
+            </div>
+            <div class="row g-3" id="publicGalleryGrid">
+                <div class="col-12 text-center py-4">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PPDB ONLINE SECTION -->
+    <section id="ppdb" class="section-padding" style="background: linear-gradient(135deg, #e0f2fe 0%, #fef9c3 100%);">
+        <div class="container">
+            <div class="text-center mb-5">
+                <span class="badge bg-primary rounded-pill px-3 py-2 mb-2">PPDB ONLINE TERINTEGRASI</span>
+                <h2 class="section-title">Pendaftaran Peserta Didik Baru</h2>
+                <p class="text-muted">Lengkapi formulir pendaftaran di bawah ini atau cek status & cetak kartu pendaftaran Anda</p>
+            </div>
+
+            <div class="row g-4">
+                <!-- FORM PENDAFTARAN -->
+                <div class="col-lg-8">
+                    <div class="card card-playful p-4 p-md-5 bg-white">
+                        <h4 class="fw-bold mb-4"><i class="fa-solid fa-file-signature text-primary me-2"></i>Formulir Pendaftaran Online</h4>
+                        <form id="formPpdbOnline">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Nama Lengkap Anak *</label>
+                                    <input type="text" class="form-control" name="child_full_name" required placeholder="Contoh: Ahmad Zaki Pratama">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">NIK Anak (16 Digit)</label>
+                                    <input type="text" class="form-control" name="child_nik" maxlength="16" placeholder="Opsional / Sesuai KK">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Jenis Kelamin *</label>
+                                    <select class="form-select" name="gender" required>
+                                        <option value="">-- Pilih --</option>
+                                        <option value="Laki-laki">Laki-laki</option>
+                                        <option value="Perempuan">Perempuan</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Tempat Lahir *</label>
+                                    <input type="text" class="form-control" name="birth_place" required placeholder="Kota kelahiran">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Tanggal Lahir *</label>
+                                    <input type="date" class="form-control" name="birth_date" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Pilihan Kelompok Belajar *</label>
+                                    <select class="form-select" name="target_group" required>
+                                        <option value="TK A">TK A (Usia 4-5 Tahun)</option>
+                                        <option value="TK B">TK B (Usia 5-6 Tahun)</option>
+                                        <option value="KB">Kelompok Bermain / KB (Usia 3-4 Tahun)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">No. WhatsApp Orang Tua *</label>
+                                    <input type="tel" class="form-control" name="parent_whatsapp" required placeholder="081234567890">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Nama Ayah *</label>
+                                    <input type="text" class="form-control" name="father_name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Nama Ibu *</label>
+                                    <input type="text" class="form-control" name="mother_name" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Alamat Lengkap *</label>
+                                    <textarea class="form-control" name="address" rows="2" required placeholder="Nama jalan, RT/RW, Kelurahan, Kecamatan"></textarea>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Pas Foto Anak (JPG/PNG)</label>
+                                    <input type="file" class="form-control" id="ppdbPhotoFile" accept="image/*">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Scan Akta Kelahiran</label>
+                                    <input type="file" class="form-control" id="ppdbAktaFile" accept="image/*,.pdf">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Scan Kartu Keluarga</label>
+                                    <input type="file" class="form-control" id="ppdbKkFile" accept="image/*,.pdf">
+                                </div>
+                                <div class="col-12 mt-4">
+                                    <button type="submit" id="btnSubmitPpdb" class="btn btn-ppdb btn-lg w-100">
+                                        <i class="fa-solid fa-paper-plane me-2"></i>Kirim Pendaftaran PPDB
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- CEK STATUS & CETAK KARTU -->
+                <div class="col-lg-4">
+                    <div class="card card-playful p-4 bg-white mb-4">
+                        <h5 class="fw-bold mb-3"><i class="fa-solid fa-magnifying-glass text-success me-2"></i>Cek Status & Cetak Kartu</h5>
+                        <p class="small text-muted">Masukkan Nomor Registrasi PPDB Anda untuk melihat perkembangan verifikasi atau mencetak ulang Kartu Peserta (PDF).</p>
+                        <form id="formCheckStatus">
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="inputCheckRegNum" placeholder="Contoh: PPDB-2026-XXXX" required>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100 rounded-pill fw-semibold">Periksa Status</button>
+                        </form>
+                        <div id="statusResultBox" class="mt-3 d-none p-3 rounded-3 bg-light border"></div>
+                    </div>
+
+                    <div class="card card-playful p-4 bg-primary text-white">
+                        <h5 class="fw-bold"><i class="fa-solid fa-circle-info me-2"></i>Alur Pendaftaran</h5>
+                        <ol class="small ps-3 mb-0 mt-2 lh-lg">
+                            <li>Isi formulir data calon siswa & orang tua.</li>
+                            <li>Unggah dokumen persyaratan (Akta & KK).</li>
+                            <li>Cetak <strong>Kartu Peserta PPDB (PDF)</strong>.</li>
+                            <li>Panitia memverifikasi berkas secara online.</li>
+                            <li>Pantau pengumuman kelulusan via fitur Cek Status.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- KONTAK & LOKASI -->
+    <section id="kontak" class="section-padding">
+        <div class="container">
+            <div class="row g-5">
+                <div class="col-lg-5">
+                    <span class="text-primary fw-bold text-uppercase small">Hubungi Kami</span>
+                    <h2 class="section-title">Informasi Kontak & Lokasi</h2>
+                    <p class="text-muted mb-4">Punya pertanyaan seputar pendaftaran atau program belajar? Kirimkan pesan kepada kami.</p>
+
+                    <div class="d-flex gap-3 mb-3">
+                        <div class="icon-circle bg-sky-soft flex-shrink-0" style="width: 48px; height: 48px; font-size: 1.1rem;"><i class="fa-solid fa-location-dot"></i></div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Alamat Sekolah</h6>
+                            <p class="small text-muted mb-0" id="contactAddress">Jl. Pendidikan Anak No. 12, Bekasi, Jawa Barat</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3 mb-3">
+                        <div class="icon-circle bg-green-soft flex-shrink-0" style="width: 48px; height: 48px; font-size: 1.1rem;"><i class="fa-brands fa-whatsapp"></i></div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Telepon / WhatsApp</h6>
+                            <p class="small text-muted mb-0" id="contactPhone">+62 812-3456-7890</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3 mb-4">
+                        <div class="icon-circle bg-yellow-soft flex-shrink-0" style="width: 48px; height: 48px; font-size: 1.1rem;"><i class="fa-solid fa-envelope"></i></div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Email Resmi</h6>
+                            <p class="small text-muted mb-0" id="contactEmail">info@tkcerianusantara.sch.id</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-7">
+                    <div class="card card-playful p-4">
+                        <h5 class="fw-bold mb-3">Kirim Pesan ke Sekolah</h5>
+                        <form id="formContactMessage">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" name="sender_name" placeholder="Nama Lengkap Anda *" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="tel" class="form-control" name="sender_phone" placeholder="Nomor WhatsApp / HP *" required>
+                                </div>
+                                <div class="col-12">
+                                    <input type="text" class="form-control" name="subject" placeholder="Subjek Pesan *" required>
+                                </div>
+                                <div class="col-12">
+                                    <textarea class="form-control" name="message" rows="3" placeholder="Tulis pesan atau pertanyaan Anda..." required></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold">Kirim Pesan</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="row g-4 pb-4 border-bottom border-secondary">
+                <div class="col-lg-5">
+                    <h4 class="text-white fw-bold mb-3"><i class="fa-solid fa-shapes text-warning me-2"></i><span id="footerSchoolName">TK NUSA INDAH</span></h4>
+                    <p class="small">Lembaga Pendidikan Anak Usia Dini yang berfokus pada pengembangan karakter, kreativitas, dan kemandirian anak dalam suasana penuh keceriaan.</p>
+                </div>
+                <div class="col-lg-3">
+                    <h6 class="text-white fw-bold mb-3">Tautan Cepat</h6>
+                    <ul class="list-unstyled small lh-lg">
+                        <li><a href="#profil" class="text-decoration-none text-light">Profil Sekolah</a></li>
+                        <li><a href="#program" class="text-decoration-none text-light">Program Pendidikan</a></li>
+                        <li><a href="#ppdb" class="text-decoration-none text-light">PPDB Online</a></li>
+                        <li><a href="admin/login.html" class="text-decoration-none text-warning">Portal Login Admin</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4">
+                    <h6 class="text-white fw-bold mb-3">Jam Operasional</h6>
+                    <p class="small mb-1">Senin – Jumat: 07.30 – 13.00 WIB</p>
+                    <p class="small mb-0">Sabtu: Kegiatan Ekstrakurikuler (08.00 – 11.00 WIB)</p>
+                </div>
+            </div>
+            <div class="text-center pt-3 small" id="footerCopyright">
+                © 2026 TK NUSA INDAH. Sistem Informasi Manajemen Sekolah Terintegrasi.
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL DETAIL BERITA -->
+    <div class="modal fade" id="newsDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content rounded-4">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="modalNewsTitle">Judul Berita</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <img id="modalNewsImg" src="" class="img-fluid rounded-3 mb-3 w-100" style="max-height: 320px; object-fit: cover;">
+                    <div id="modalNewsContent" class="lh-lg"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/supabase.js"></script>
+    <script src="assets/js/ppdb-card.js"></script>
+
+    <script>
+        // Fallback inisialisasi & helper jika preview dijalankan secara terisolasi tanpa relative scripts
+        if (typeof window.supabaseClient === 'undefined' && window.supabase) {
+            const sbUrl = window.ENV ? .SUPABASE_URL || 'https://YOUR_PROJECT_ID.supabase.co';
+            const sbKey = window.ENV ? .SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
+            window.supabaseClient = window.supabase.createClient(sbUrl, sbKey);
+        }
+
+        if (typeof window.sanitizeHTML !== 'function') {
+            window.sanitizeHTML = function(str) {
+                if (!str) return '';
+                const temp = document.createElement('div');
+                temp.textContent = str;
+                return temp.innerHTML;
+            };
+        }
+
+        if (typeof window.uploadFileToCloud !== 'function') {
+            window.uploadFileToCloud = async function(file, bucket = 'school-public', folder = 'general') {
+                if (!file || !window.supabaseClient) return null;
+                const fileExt = file.name.split('.').pop();
+                const filePath = `${folder}/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+                const {
+                    error
+                } = await window.supabaseClient.storage.from(bucket).upload(filePath, file);
+                if (error) throw error;
+                if (bucket === 'school-public') {
+                    return window.supabaseClient.storage.from(bucket).getPublicUrl(filePath).data.publicUrl;
+                }
+                return filePath;
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', async() => {
+            await loadPublicSchoolData();
+            await loadPublicTeachers();
+            await loadPublicNews();
+            await loadPublicGallery();
+        });
+
+        async function loadPublicSchoolData() {
+            try {
+                const {
+                    data: profile
+                } = await supabaseClient.from('school_profile').select('*').limit(1).single();
+                if (profile) {
+                    document.getElementById('navSchoolName').textContent = profile.school_name;
+                    document.getElementById('footerSchoolName').textContent = profile.school_name;
+                    if (profile.tagline) document.getElementById('heroTagline').textContent = profile.tagline;
+                    if (profile.vision) document.getElementById('schoolVision').textContent = profile.vision;
+                    if (profile.mission) document.getElementById('schoolMission').textContent = profile.mission;
+                    if (profile.principal_name) document.getElementById('principalName').textContent = profile.principal_name;
+                    if (profile.principal_welcome) document.getElementById('principalWelcome').textContent = profile.principal_welcome;
+                    if (profile.principal_photo_url) document.getElementById('principalPhoto').src = profile.principal_photo_url;
+                    if (profile.address) document.getElementById('contactAddress').textContent = profile.address;
+                    if (profile.whatsapp || profile.phone) document.getElementById('contactPhone').textContent = profile.whatsapp || profile.phone;
+                    if (profile.email) document.getElementById('contactEmail').textContent = profile.email;
+                }
+
+                const {
+                    data: settings
+                } = await supabaseClient.from('site_settings').select('*').eq('id', 1).single();
+                if (settings) {
+                    if (settings.active_academic_year) document.getElementById('heroAcademicYear').textContent = settings.active_academic_year;
+                    if (settings.hero_banner_url) document.getElementById('heroBannerImg').src = settings.hero_banner_url;
+                    if (settings.footer_text) document.getElementById('footerCopyright').textContent = settings.footer_text;
+                }
+            } catch (err) {
+                console.warn('Menggunakan tampilan default profil sekolah:', err.message);
+            }
+        }
+
+        async function loadPublicTeachers() {
+            const container = document.getElementById('publicTeachersGrid');
+            const {
+                data: teachers,
+                error
+            } = await supabaseClient
+                .from('teachers')
+                .select('*')
+                .eq('status', 'Aktif')
+                .order('created_at', {
+                    ascending: true
+                });
+
+            if (error || !teachers || teachers.length === 0) {
+                container.innerHTML = `<div class="col-12 text-center text-muted">Belum ada data guru yang dipublikasikan.</div>`;
+                return;
+            }
+
+            container.innerHTML = teachers.map(t => `
+                <div class="col-md-6 col-lg-3">
+                    <div class="card card-playful text-center p-4 h-100">
+                        <img src="${t.photo_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(t.full_name) + '&background=e0f2fe&color=0284c7'}" class="teacher-avatar mx-auto mb-3" alt="${sanitizeHTML(t.full_name)}">
+                        <h5 class="fw-bold mb-1">${sanitizeHTML(t.full_name)}</h5>
+                        <span class="badge bg-sky-soft text-primary mb-2">${sanitizeHTML(t.position)}</span>
+                        <p class="small text-muted mb-1"><i class="fa-solid fa-graduation-cap me-1"></i>${sanitizeHTML(t.education || '-')}</p>
+                        <p class="small text-muted mb-0">${sanitizeHTML(t.bio || '')}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadPublicNews() {
+            const container = document.getElementById('publicNewsGrid');
+            const {
+                data: newsList,
+                error
+            } = await supabaseClient
+                .from('news')
+                .select('*, news_categories(name)')
+                .eq('status', 'published')
+                .order('published_at', {
+                    ascending: false
+                })
+                .limit(6);
+
+            if (error || !newsList || newsList.length === 0) {
+                container.innerHTML = `<div class="col-12 text-center text-muted">Belum ada berita terbaru.</div>`;
+                return;
+            }
+
+            window._publicNewsCache = newsList;
+            container.innerHTML = newsList.map((n, idx) => `
+                <div class="col-md-4">
+                    <div class="card card-playful h-100">
+                        <img src="${n.thumbnail_url || 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=600&q=80'}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="${sanitizeHTML(n.title)}">
+                        <div class="card-body d-flex flex-column">
+                            <span class="badge bg-warning text-dark align-self-start mb-2">${sanitizeHTML(n.news_categories?.name || 'Informasi')}</span>
+                            <h5 class="fw-bold">${sanitizeHTML(n.title)}</h5>
+                            <p class="small text-muted flex-grow-1">${sanitizeHTML(n.summary || n.content.substring(0, 100) + '...')}</p>
+                            <button onclick="openNewsModal(${idx})" class="btn btn-outline-primary btn-sm rounded-pill align-self-start mt-2">Baca Selengkapnya</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openNewsModal(idx) {
+            const item = window._publicNewsCache[idx];
+            if (!item) return;
+            document.getElementById('modalNewsTitle').textContent = item.title;
+            document.getElementById('modalNewsImg').src = item.thumbnail_url || 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=800&q=80';
+            document.getElementById('modalNewsContent').innerText = item.content;
+            new bootstrap.Modal(document.getElementById('newsDetailModal')).show();
+        }
+
+        async function loadPublicGallery() {
+            const container = document.getElementById('publicGalleryGrid');
+            const {
+                data: items,
+                error
+            } = await supabaseClient
+                .from('gallery_items')
+                .select('*, galleries(title)')
+                .order('created_at', {
+                    ascending: false
+                })
+                .limit(8);
+
+            if (error || !items || items.length === 0) {
+                container.innerHTML = `<div class="col-12 text-center text-muted">Belum ada dokumentasi galeri.</div>`;
+                return;
+            }
+
+            container.innerHTML = items.map(item => `
+                <div class="col-6 col-md-3">
+                    <div class="card card-playful overflow-hidden">
+                        <img src="${item.media_url}" class="gallery-img" alt="${sanitizeHTML(item.caption || 'Kegiatan TK')}" onclick="Swal.fire({imageUrl: '${item.media_url}', title: '${sanitizeHTML(item.caption || item.galleries?.title || 'Dokumentasi')}', showConfirmButton: false})">
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // SUBMIT PPDB ONLINE KE SUPABASE + CLOUD STORAGE
+        document.getElementById('formPpdbOnline').addEventListener('submit', async(e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitPpdb');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Mengunggah & Menyimpan...';
+
+            try {
+                const formData = new FormData(e.target);
+                const regNumber = `PPDB-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+                const photoFile = document.getElementById('ppdbPhotoFile').files[0];
+                const aktaFile = document.getElementById('ppdbAktaFile').files[0];
+                const kkFile = document.getElementById('ppdbKkFile').files[0];
+
+                const [photoUrl, aktaUrl, kkUrl] = await Promise.all([
+                    photoFile ? uploadFileToCloud(photoFile, 'school-public', 'ppdb-photos') : null,
+                    aktaFile ? uploadFileToCloud(aktaFile, 'ppdb-documents', 'akta') : null,
+                    kkFile ? uploadFileToCloud(kkFile, 'ppdb-documents', 'kk') : null
+                ]);
+
+                const payload = {
+                    registration_number: regNumber,
+                    child_full_name: formData.get('child_full_name'),
+                    child_nik: formData.get('child_nik'),
+                    gender: formData.get('gender'),
+                    birth_place: formData.get('birth_place'),
+                    birth_date: formData.get('birth_date'),
+                    address: formData.get('address'),
+                    target_group: formData.get('target_group'),
+                    academic_year: document.getElementById('heroAcademicYear').textContent || '2026/2027',
+                    father_name: formData.get('father_name'),
+                    mother_name: formData.get('mother_name'),
+                    parent_whatsapp: formData.get('parent_whatsapp'),
+                    photo_url: photoUrl,
+                    birth_certificate_url: aktaUrl,
+                    family_card_url: kkUrl,
+                    status: 'Menunggu'
+                };
+
+                const {
+                    error
+                } = await supabaseClient.from('admissions').insert([payload]);
+                if (error) throw error;
+
+                e.target.reset();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Pendaftaran Berhasil!',
+                    html: `
+                        <p class="mb-1">Simpan Nomor Registrasi Anda:</p>
+                        <h3 class="text-primary fw-bold">${regNumber}</h3>
+                        <p class="small text-muted mb-3">Silakan cetak Kartu Peserta PPDB sebagai bukti pendaftaran.</p>
+                        <button type="button" onclick="printPpdbParticipantCard('${regNumber}')" class="btn btn-primary rounded-pill px-4 fw-bold">
+                            <i class="fa-solid fa-print me-2"></i>Cetak Kartu Peserta (PDF)
+                        </button>
+                    `,
+                    confirmButtonText: 'Selesai'
+                });
+            } catch (err) {
+                Swal.fire('Gagal Mendaftar', err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>Kirim Pendaftaran PPDB';
+            }
+        });
+
+        // CEK STATUS PENDAFTARAN PPDB + TOMBOL CETAK KARTU
+        document.getElementById('formCheckStatus').addEventListener('submit', async(e) => {
+                    e.preventDefault();
+                    const regNum = document.getElementById('inputCheckRegNum').value.trim().toUpperCase();
+                    const box = document.getElementById('statusResultBox');
+                    box.classList.remove('d-none');
+                    box.innerHTML = '<div class="text-center small"><span class="spinner-border spinner-border-sm"></span> Mencari data...</div>';
+
+                    const {
+                        data,
+                        error
+                    } = await supabaseClient
+                        .from('admissions')
+                        .select('*')
+                        .eq('registration_number', regNum)
+                        .single();
+
+                    if (error || !data) {
+                        box.innerHTML = `<span class="text-danger small fw-semibold"><i class="fa-solid fa-circle-xmark me-1"></i>Nomor registrasi tidak ditemukan.</span>`;
+                        return;
+                    }
+
+                    const badgeColor = data.status === 'Diterima' ? 'success' : (data.status === 'Ditolak' ? 'danger' : (data.status === 'Verifikasi' ? 'info' : 'warning'));
+                    box.innerHTML = `
+                <div class="small">
+                    <div class="fw-bold fs-6">${sanitizeHTML(data.child_full_name)}</div>
+                    <div class="text-muted mb-2">Kelompok: ${sanitizeHTML(data.target_group)}</div>
+                    <div class="mb-2">Status: <span class="badge bg-${badgeColor}">${sanitizeHTML(data.status)}</span></div>
+                    ${data.admin_notes ? `<div class="mb-2 text-muted fst-italic">Catatan: ${sanitizeHTML(data.admin_notes)}</div>` : ''}
+                    <button type="button" onclick="printPpdbParticipantCard('${sanitizeHTML(data.registration_number)}')" class="btn btn-outline-primary btn-sm w-100 rounded-pill mt-1 fw-semibold">
+                        <i class="fa-solid fa-file-pdf me-1"></i> Cetak Kartu Peserta (PDF)
+                    </button>
+                </div>
+            `;
+        });
+
+        // KIRIM PESAN KONTAK
+        document.getElementById('formContactMessage').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const { error } = await supabaseClient.from('contact_messages').insert([{
+                sender_name: formData.get('sender_name'),
+                sender_phone: formData.get('sender_phone'),
+                subject: formData.get('subject'),
+                message: formData.get('message')
+            }]);
+
+            if (error) {
+                Swal.fire('Gagal', error.message, 'error');
+            } else {
+                e.target.reset();
+                Swal.fire('Terkirim!', 'Terima kasih, pesan Anda telah diterima pihak sekolah.', 'success');
+            }
+        });
+    </script>
+</body>
+
+</html>
