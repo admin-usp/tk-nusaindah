@@ -659,7 +659,7 @@
             if (!admission) throw new Error('Data pendaftar tidak ditemukan.');
 
             const schoolName = document.getElementById('setSchoolName')?.value || 'TK NUSA INDAH';
-            const schoolAddress = document.getElementById('setAddress')?.value || 'Jl. Pendidikan Anak Usia Dini';
+            const schoolAddress = document.getElementById('setAddress')?.value || 'Jln. Tlompak Sari 2, Ngempon, Kec. Bergas, Kab. Semarang, Prov. Jawa Tengah';
             const schoolContact = document.getElementById('setWhatsapp')?.value || '-';
             const photoUrl = admission.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(admission.child_full_name || 'Siswa')}&background=e0f2fe&color=0284c7&size=200`;
             const regDate = admission.created_at
