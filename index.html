@@ -734,7 +734,6 @@
                 Swal.fire('Gagal Menampilkan Kartu', err.message, 'error');
             }
         };
-        }
 
         if (typeof window.uploadFileToCloud !== 'function') {
             window.uploadFileToCloud = async function (file, bucket = 'school-public', folder = 'general') {
