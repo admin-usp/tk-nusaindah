@@ -44,7 +44,7 @@ async function printPpdbParticipantCard(regNumberOrObj) {
             .maybeSingle();
 
         const schoolName = school?.school_name || 'TK NUSA INDAH';
-        const schoolAddress = school?.address || 'Jl. Pendidikan Anak Usia Dini No. 12';
+        const schoolAddress = school?.address || 'Jln. Tlompak Sari 2, Ngempon, Kec. Bergas, Kab. Semarang, Prov. Jawa Tengah';
         const schoolContact = `Telp/WA: ${school?.whatsapp || school?.phone || '-'} | Email: ${school?.email || '-'}`;
         const photoUrl = admission.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(admission.child_full_name || 'Siswa')}&background=e0f2fe&color=0284c7&size=200`;
         const regDate = admission.created_at
