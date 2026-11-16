@@ -44,7 +44,7 @@ Peringatan Keamanan: Jangan pernah menaruh service_role key di sisi klien/fronte
 
 Pada dashboard Supabase, buka menu Authentication > Users, klik Add User > Create New User.
 
-Masukkan email dan password admin (misal: admin@tkcerianusantara.sch.id), lalu salin User UID yang terbentuk.
+Masukkan email dan password admin (misal: admin@tknusaindah.sch.id), lalu salin User UID yang terbentuk.
 
 Jalankan perintah SQL berikut pada SQL Editor untuk mendaftarkan hak aksesnya pada tabel profiles:
 
@@ -52,7 +52,7 @@ INSERT INTO public.profiles (id, full_name, email, role, is_active)
 VALUES (
     'PASTE-USER-UID-DI-SINI',
     'Administrator Utama',
-    'admin@tkcerianusantara.sch.id',
+    'admin@tknusaindah.sch.id',
     'super_admin',
     TRUE
 );
