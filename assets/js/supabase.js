@@ -9,7 +9,8 @@
 //     ANON_KEY: window.ENV ? .SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY'
 // };
 const SUPABASE_CONFIG = {
-    URL: window.ENV?.SUPABASE_URL || 'https://pqdbcfchsoguokgztzbn.supabase.co',
+    // URL: window.ENV?.SUPABASE_URL || 'https://pqdbcfchsoguokgztzbn.supabase.co',
+    URL: window.ENV?.SUPABASE_URL || 'https://pqdbcfchsoguokgztzbn.supabase.co/rest/v1/',
     ANON_KEY: window.ENV?.SUPABASE_ANON_KEY || 'sb_publishable_u7Fd9Ifl6Tr3Im1Dqhb8Wg_2AjUjYvZ'
 };
 
