@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,20 +13,10 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             background: linear-gradient(135deg, #e0f2fe 0%, #dcfce7 100%);
         }
-        
-        .login-box {
-            width: 400px;
-            max-width: 92%;
-        }
-        
-        .card {
-            border-radius: 18px;
-            border: none;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
-        }
+        .login-box { width: 400px; max-width: 92%; }
+        .card { border-radius: 18px; border: none; box-shadow: 0 15px 35px rgba(0,0,0,0.08); }
     </style>
 </head>
-
 <body class="hold-transition login-page">
     <div class="login-box">
         <div class="card card-outline card-primary">
@@ -72,27 +61,21 @@
     <script>
         // Fallback inisialisasi jika halaman dijalankan terisolasi tanpa relative script ../assets/js/supabase.js
         if (typeof window.supabaseClient === 'undefined' && window.supabase) {
-            const sbUrl = window.ENV ? .SUPABASE_URL || 'https://YOUR_PROJECT_ID.supabase.co';
-            const sbKey = window.ENV ? .SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
+            const sbUrl = window.ENV?.SUPABASE_URL || 'https://YOUR_PROJECT_ID.supabase.co';
+            const sbKey = window.ENV?.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
             window.supabaseClient = window.supabase.createClient(sbUrl, sbKey);
         }
 
         if (typeof window.logAdminActivity !== 'function') {
-            window.logAdminActivity = async function() {
-                return;
-            };
+            window.logAdminActivity = async function () { return; };
         }
 
-        document.addEventListener('DOMContentLoaded', async() => {
+        document.addEventListener('DOMContentLoaded', async () => {
             try {
-                const urlStr = window.supabaseClient ? .supabaseUrl || '';
+                const urlStr = window.supabaseClient?.supabaseUrl || '';
                 if (!urlStr || urlStr.includes('YOUR_PROJECT_ID')) return;
 
-                const {
-                    data: {
-                        session
-                    }
-                } = await supabaseClient.auth.getSession();
+                const { data: { session } } = await supabaseClient.auth.getSession();
                 if (session) {
                     window.location.href = 'dashboard.html';
                 }
@@ -101,7 +84,7 @@
             }
         });
 
-        document.getElementById('adminLoginForm').addEventListener('submit', async(e) => {
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnLogin');
             const email = document.getElementById('loginEmail').value.trim();
@@ -111,39 +94,47 @@
             btn.innerHTML = '<span class="spinner-border spinner-border-sm mr-2"></span>Memverifikasi...';
 
             try {
-                const {
-                    data,
-                    error
-                } = await supabaseClient.auth.signInWithPassword({
-                    email,
-                    password
-                });
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                 if (error) throw error;
 
                 // Cek profil & role di tabel profiles
-                const {
-                    data: profile,
-                    error: profErr
-                } = await supabaseClient
+                const { data: profile, error: profErr } = await supabaseClient
                     .from('profiles')
                     .select('*')
                     .eq('id', data.user.id)
                     .single();
 
-                if (profErr || !profile || !profile.is_active) {
+                if (profErr) {
                     await supabaseClient.auth.signOut();
-                    throw new Error('Akun Anda tidak memiliki izin akses administrator atau dinonaktifkan.');
+                    throw new Error(`Gagal membaca profil admin (${profErr.code || 'RLS'}): ${profErr.message}`);
+                }
+
+                if (!profile || !profile.is_active) {
+                    await supabaseClient.auth.signOut();
+                    throw new Error('Akun Anda belum terdaftar di tabel profiles atau statusnya nonaktif.');
                 }
 
                 await logAdminActivity('LOGIN', 'profiles', data.user.id, `Login berhasil oleh ${profile.full_name}`);
                 window.location.href = 'dashboard.html';
             } catch (err) {
-                Swal.fire('Login Gagal', err.message, 'error');
+                console.error('Detail Login Error:', err);
+                const activeUrl = window.supabaseClient?.supabaseUrl || 'Tidak terdeteksi';
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Login Gagal',
+                    html: `
+                        <p class="mb-2">${err.message}</p>
+                        <div class="text-left small bg-light p-2 rounded border">
+                            <strong>Diagnosa Koneksi:</strong><br>
+                            • Endpoint: <code>${activeUrl}</code><br>
+                            • Tips: Pastikan <code>ANON_KEY</code> di <code>assets/js/supabase.js</code> menggunakan kunci <b>anon public (eyJ...)</b> dari menu <i>Project Settings &gt; API</i>.
+                        </div>
+                    `
+                });
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Masuk ke Dashboard';
             }
         });
     </script>
 </body>
-
 </html>
