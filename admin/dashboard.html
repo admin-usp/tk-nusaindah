@@ -554,10 +554,11 @@
         <div class="modal-content">
             <form id="formCreateUserAdmin">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title font-weight-bold">Buat Akun Pengguna Baru</h5>
+                    <h5 class="modal-title font-weight-bold" id="userModalTitle">Buat Akun Pengguna Baru</h5>
                     <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
+                    <input type="hidden" id="editUserId">
                     <div class="form-group">
                         <label>Nama Lengkap *</label>
                         <input type="text" class="form-control" id="newUserFullName" required placeholder="Contoh: Budi Santoso, S.Pd">
@@ -567,7 +568,7 @@
                         <input type="email" class="form-control" id="newUserEmail" required placeholder="nama@tknusaindah.sch.id">
                     </div>
                     <div class="form-group">
-                        <label>Password Sementara (Min. 6 Karakter) *</label>
+                        <label id="newUserPasswordLabel">Password Sementara (Min. 6 Karakter) *</label>
                         <input type="password" class="form-control" id="newUserPassword" minlength="6" required placeholder="******">
                     </div>
                     <div class="form-group">
@@ -578,6 +579,13 @@
                             <option value="operator" selected>Operator</option>
                             <option value="guru">Guru</option>
                             <option value="pengunjung">Pengunjung</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="editUserStatusGroup" style="display: none;">
+                        <label>Status Akun</label>
+                        <select class="form-control" id="editUserIsActive">
+                            <option value="true">Aktif</option>
+                            <option value="false">Nonaktif</option>
                         </select>
                     </div>
                 </div>
@@ -1715,6 +1723,8 @@
             return;
         }
 
+        window._adminUsersCache = users || [];
+
         const roleLabels = {
             super_admin: 'Super Admin',
             admin_sekolah: 'Admin Sekolah',
@@ -1723,7 +1733,7 @@
             pengunjung: 'Pengunjung'
         };
 
-        tbody.innerHTML = (users || []).map(u => {
+        tbody.innerHTML = (users || []).map((u, idx) => {
             const isSelf = currentAdminProfile && u.id === currentAdminProfile.id;
             return `
                 <tr>
@@ -1738,18 +1748,106 @@
                         <span class="badge badge-${u.is_active ? 'success' : 'danger'}">${u.is_active ? 'Aktif' : 'Nonaktif'}</span>
                     </td>
                     <td>
-                        ${isSelf ? '<small class="text-muted">Akun Anda</small>' : `
-                        <button type="button" class="btn btn-xs btn-${u.is_active ? 'warning' : 'success'}" onclick="toggleUserActive('${u.id}', ${!u.is_active})">
-                            ${u.is_active ? 'Nonaktifkan' : 'Aktifkan'}
-                        </button>`}
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-info" onclick="viewUserDetailAdmin(${idx})" title="Lihat Detail Akun">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button type="button" class="btn btn-warning" onclick="openUserModalAdmin(${idx})" title="Edit / Update Akun">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            ${!isSelf ? `
+                            <button type="button" class="btn btn-${u.is_active ? 'secondary' : 'success'}" onclick="toggleUserActive('${u.id}', ${!u.is_active})" title="${u.is_active ? 'Nonaktifkan Akun' : 'Aktifkan Akun'}">
+                                <i class="fas fa-${u.is_active ? 'user-slash' : 'user-check'}"></i>
+                            </button>` : ''}
+                        </div>
                     </td>
                 </tr>
             `;
         }).join('');
     }
 
-    function openUserModalAdmin() {
+    function viewUserDetailAdmin(idx) {
+        const u = (window._adminUsersCache || [])[idx];
+        if (!u) return;
+
+        const roleLabels = {
+            super_admin: 'Super Admin (Akses Penuh)',
+            admin_sekolah: 'Admin Sekolah',
+            operator: 'Operator',
+            guru: 'Guru',
+            pengunjung: 'Pengunjung'
+        };
+
+        const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(u.full_name || u.email)}&background=e0f2fe&color=0284c7&size=180`;
+        const createdDate = u.created_at
+            ? new Date(u.created_at).toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+            : '-';
+
+        Swal.fire({
+            title: 'Detail Akun Pengguna',
+            html: `
+                <div class="text-center mb-3">
+                    <img src="${avatar}" class="rounded-circle border shadow-sm" style="width:90px; height:90px; object-fit:cover;">
+                    <h5 class="font-weight-bold mt-2 mb-0">${sanitizeHTML(u.full_name || '-')}</h5>
+                    <span class="badge badge-primary">${sanitizeHTML(roleLabels[u.role] || u.role)}</span>
+                </div>
+                <table class="table table-sm table-bordered text-left small">
+                    <tr><th style="width:36%">User ID</th><td><code class="small">${sanitizeHTML(u.id)}</code></td></tr>
+                    <tr><th>Email Login</th><td>${sanitizeHTML(u.email)}</td></tr>
+                    <tr><th>Role / Peran</th><td><strong>${sanitizeHTML(roleLabels[u.role] || u.role)}</strong></td></tr>
+                    <tr><th>Status Akun</th><td><span class="badge badge-${u.is_active ? 'success' : 'danger'}">${u.is_active ? 'Aktif' : 'Nonaktif'}</span></td></tr>
+                    <tr><th>Terdaftar Pada</th><td>${createdDate}</td></tr>
+                </table>
+            `,
+            confirmButtonText: 'Tutup'
+        });
+    }
+
+    function openUserModalAdmin(idx = null) {
         document.getElementById('formCreateUserAdmin').reset();
+        const modalTitle = document.getElementById('userModalTitle');
+        const passInput = document.getElementById('newUserPassword');
+        const passLabel = document.getElementById('newUserPasswordLabel');
+        const statusGroup = document.getElementById('editUserStatusGroup');
+        const roleSelect = document.getElementById('newUserRole');
+        const statusSelect = document.getElementById('editUserIsActive');
+        const btnSave = document.getElementById('btnSaveNewUser');
+
+        if (idx !== null && (window._adminUsersCache || [])[idx]) {
+            const u = window._adminUsersCache[idx];
+            const isSelf = currentAdminProfile && u.id === currentAdminProfile.id;
+
+            modalTitle.textContent = 'Update Akun Pengguna';
+            btnSave.textContent = 'Simpan Perubahan';
+            document.getElementById('editUserId').value = u.id;
+            document.getElementById('newUserFullName').value = u.full_name || '';
+            document.getElementById('newUserEmail').value = u.email || '';
+
+            passInput.required = false;
+            passInput.value = '';
+            passInput.placeholder = 'Kosongkan jika tidak mengubah password';
+            passLabel.innerHTML = 'Password Baru <small class="text-muted">(Opsional, min. 6 karakter)</small>';
+
+            roleSelect.value = u.role || 'operator';
+            roleSelect.disabled = isSelf;
+
+            statusGroup.style.display = isSelf ? 'none' : 'block';
+            statusSelect.value = String(u.is_active);
+        } else {
+            modalTitle.textContent = 'Buat Akun Pengguna Baru';
+            btnSave.textContent = 'Buat Akun';
+            document.getElementById('editUserId').value = '';
+
+            passInput.required = true;
+            passInput.placeholder = '******';
+            passLabel.textContent = 'Password Sementara (Min. 6 Karakter) *';
+
+            roleSelect.disabled = false;
+            roleSelect.value = 'operator';
+            statusGroup.style.display = 'none';
+            statusSelect.value = 'true';
+        }
+
         $('#userModalAdmin').modal('show');
     }
 
@@ -1759,27 +1857,47 @@
         btn.disabled = true;
 
         try {
+            const editUserId = document.getElementById('editUserId').value;
             const fullName = document.getElementById('newUserFullName').value.trim();
             const email = document.getElementById('newUserEmail').value.trim();
             const password = document.getElementById('newUserPassword').value;
             const role = document.getElementById('newUserRole').value;
+            const isActive = document.getElementById('editUserIsActive').value === 'true';
 
-            // Gunakan fungsi RPC database agar tidak terkena email rate limit Supabase
-            const { data: newUid, error: rpcErr } = await supabaseClient.rpc('admin_create_user_account', {
-                p_email: email,
-                p_password: password,
-                p_full_name: fullName,
-                p_role: role
-            });
+            if (editUserId) {
+                const { error: rpcErr } = await supabaseClient.rpc('admin_update_user_account', {
+                    p_user_id: editUserId,
+                    p_email: email,
+                    p_full_name: fullName,
+                    p_role: role,
+                    p_is_active: isActive,
+                    p_new_password: password || null
+                });
 
-            if (rpcErr) throw rpcErr;
+                if (rpcErr) throw rpcErr;
 
-            await logAdminActivity('CREATE_USER', 'profiles', newUid, `Membuat akun ${email} dengan role ${role}`);
-            $('#userModalAdmin').modal('hide');
-            Swal.fire('Berhasil!', `Akun ${email} (${role.toUpperCase()}) berhasil dibuat dan langsung siap login.`, 'success');
+                await logAdminActivity('UPDATE_USER', 'profiles', editUserId, `Memperbarui akun ${email} (${role})`);
+                $('#userModalAdmin').modal('hide');
+                Swal.fire('Diperbarui!', `Data akun ${email} berhasil diperbarui.`, 'success');
+            } else {
+                // Gunakan fungsi RPC database agar tidak terkena email rate limit Supabase
+                const { data: newUid, error: rpcErr } = await supabaseClient.rpc('admin_create_user_account', {
+                    p_email: email,
+                    p_password: password,
+                    p_full_name: fullName,
+                    p_role: role
+                });
+
+                if (rpcErr) throw rpcErr;
+
+                await logAdminActivity('CREATE_USER', 'profiles', newUid, `Membuat akun ${email} dengan role ${role}`);
+                $('#userModalAdmin').modal('hide');
+                Swal.fire('Berhasil!', `Akun ${email} (${role.toUpperCase()}) berhasil dibuat dan langsung siap login.`, 'success');
+            }
+
             loadUsersAdmin();
         } catch (err) {
-            Swal.fire('Gagal Membuat Akun', err.message, 'error');
+            Swal.fire('Gagal Menyimpan Akun', err.message, 'error');
         } finally {
             btn.disabled = false;
         }
