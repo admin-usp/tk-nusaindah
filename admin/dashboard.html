@@ -98,7 +98,7 @@
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
         <a href="#" onclick="switchAdminTab('dashboard')" class="brand-link text-center">
             <i class="fa-solid fa-shapes text-warning mr-2"></i>
-            <span class="brand-text font-weight-bold">SIM TK CERIA</span>
+            <span class="brand-text font-weight-bold">TK NUSA INDAH</span>
         </a>
 
         <div class="sidebar">
@@ -650,9 +650,19 @@
                     <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label>Judul Berita *</label>
-                        <input type="text" class="form-control" id="newsTitle" required>
+                    <input type="hidden" id="newsId">
+                    <div class="row">
+                        <div class="col-md-8 form-group">
+                            <label>Judul Berita *</label>
+                            <input type="text" class="form-control" id="newsTitle" required>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>Status Publikasi</label>
+                            <select class="form-control" id="newsStatus">
+                                <option value="published">Published (Tayang)</option>
+                                <option value="draft">Draft (Konsep)</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Ringkasan Singkat</label>
@@ -663,13 +673,13 @@
                         <textarea class="form-control" id="newsContent" rows="5" required></textarea>
                     </div>
                     <div class="form-group">
-                        <label>Thumbnail Berita</label>
+                        <label>Thumbnail Berita <small class="text-muted">(Kosongkan jika tidak ingin mengganti gambar saat edit)</small></label>
                         <input type="file" class="form-control-file" id="newsThumbnailFile" accept="image/*">
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-info">Publikasikan Berita</button>
+                    <button type="submit" class="btn btn-info" id="btnSaveNews">Simpan & Publikasikan</button>
                 </div>
             </form>
         </div>
@@ -1397,45 +1407,120 @@
     async function loadNewsAdmin() {
         const { data: news } = await supabaseClient.from('news').select('*').order('created_at', { ascending: false });
         const list = news || [];
-        document.getElementById('statTotalBerita').textContent = list.length;
+        window._adminNewsCache = list;
+        document.getElementById('statTotalBerita').textContent = list.filter(n => n.status === 'published').length;
 
-        document.getElementById('tbodyBerita').innerHTML = list.map(n => `
-            <tr>
-                <td><img src="${n.thumbnail_url || 'https://via.placeholder.com/60'}" width="60" class="rounded"></td>
-                <td class="font-weight-bold">${sanitizeHTML(n.title)}</td>
-                <td><span class="badge badge-success">${sanitizeHTML(n.status)}</span></td>
-                <td>${new Date(n.published_at).toLocaleDateString('id-ID')}</td>
-                <td><button class="btn btn-xs btn-danger" onclick="deleteRecord('news', '${n.id}')"><i class="fas fa-trash"></i> Hapus</button></td>
-            </tr>
-        `).join('');
+        document.getElementById('tbodyBerita').innerHTML = list.map((n, idx) => {
+            const statusBadge = n.status === 'published' ? 'success' : 'secondary';
+            const dateStr = n.published_at || n.created_at;
+            return `
+                <tr>
+                    <td><img src="${n.thumbnail_url || 'https://via.placeholder.com/60'}" width="60" height="45" style="object-fit: cover;" class="rounded"></td>
+                    <td class="font-weight-bold">${sanitizeHTML(n.title)}</td>
+                    <td><span class="badge badge-${statusBadge}">${sanitizeHTML(n.status)}</span></td>
+                    <td>${dateStr ? new Date(dateStr).toLocaleDateString('id-ID') : '-'}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-info" onclick="viewNewsDetailAdmin(${idx})" title="Pratinjau Berita"><i class="fas fa-eye"></i></button>
+                            <button type="button" class="btn btn-warning" onclick="openNewsModalAdmin(${idx})" title="Edit Berita"><i class="fas fa-edit"></i></button>
+                            <button type="button" class="btn btn-danger" onclick="deleteRecord('news', '${n.id}')" title="Hapus"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
     }
 
-    function openNewsModalAdmin() {
+    function viewNewsDetailAdmin(idx) {
+        const n = (window._adminNewsCache || [])[idx];
+        if (!n) return;
+        const thumb = n.thumbnail_url || 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=800&q=80';
+        const dateStr = n.published_at || n.created_at;
+
+        Swal.fire({
+            title: sanitizeHTML(n.title),
+            width: 720,
+            html: `
+                <div class="text-left">
+                    <div class="mb-2 d-flex justify-content-between align-items-center small text-muted">
+                        <span><i class="far fa-calendar-alt mr-1"></i> ${dateStr ? new Date(dateStr).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) : '-'}</span>
+                        <span class="badge badge-${n.status === 'published' ? 'success' : 'secondary'}">${sanitizeHTML(n.status.toUpperCase())}</span>
+                    </div>
+                    <img src="${thumb}" class="img-fluid rounded mb-3 w-100" style="max-height: 300px; object-fit: cover;">
+                    ${n.summary ? `<p class="font-italic text-muted border-left pl-2 mb-3">${sanitizeHTML(n.summary)}</p>` : ''}
+                    <div style="white-space: pre-line; line-height: 1.65; font-size: 14px;">${sanitizeHTML(n.content)}</div>
+                </div>
+            `,
+            confirmButtonText: 'Tutup'
+        });
+    }
+
+    function openNewsModalAdmin(idx = null) {
         document.getElementById('formNewsAdmin').reset();
+        const modalTitle = document.querySelector('#newsModalAdmin .modal-title');
+        const btnSave = document.getElementById('btnSaveNews');
+
+        if (idx !== null && (window._adminNewsCache || [])[idx]) {
+            const n = window._adminNewsCache[idx];
+            modalTitle.textContent = 'Edit Berita / Artikel';
+            btnSave.textContent = 'Simpan Perubahan';
+            document.getElementById('newsId').value = n.id;
+            document.getElementById('newsTitle').value = n.title || '';
+            document.getElementById('newsStatus').value = n.status || 'published';
+            document.getElementById('newsSummary').value = n.summary || '';
+            document.getElementById('newsContent').value = n.content || '';
+        } else {
+            modalTitle.textContent = 'Publikasi Berita / Artikel Baru';
+            btnSave.textContent = 'Publikasikan Berita';
+            document.getElementById('newsId').value = '';
+            document.getElementById('newsStatus').value = 'published';
+        }
         $('#newsModalAdmin').modal('show');
     }
 
     document.getElementById('formNewsAdmin').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const file = document.getElementById('newsThumbnailFile').files[0];
-        const thumbUrl = file ? await uploadFileToCloud(file, 'school-public', 'news') : null;
-        const title = document.getElementById('newsTitle').value;
-        const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
+        const btn = document.getElementById('btnSaveNews');
+        btn.disabled = true;
 
-        const { error } = await supabaseClient.from('news').insert([{
-            title,
-            slug,
-            summary: document.getElementById('newsSummary').value,
-            content: document.getElementById('newsContent').value,
-            thumbnail_url: thumbUrl,
-            author_id: currentAdminProfile.id,
-            status: 'published'
-        }]);
+        try {
+            const editId = document.getElementById('newsId').value;
+            const file = document.getElementById('newsThumbnailFile').files[0];
+            const thumbUrl = file ? await uploadFileToCloud(file, 'school-public', 'news') : null;
+            const title = document.getElementById('newsTitle').value;
+            const status = document.getElementById('newsStatus').value;
 
-        if (error) return Swal.fire('Gagal', error.message, 'error');
-        $('#newsModalAdmin').modal('hide');
-        Swal.fire('Dipublikasikan', 'Berita baru telah tayang di halaman depan.', 'success');
-        loadNewsAdmin();
+            const payload = {
+                title,
+                summary: document.getElementById('newsSummary').value || null,
+                content: document.getElementById('newsContent').value,
+                status,
+                ...(thumbUrl && { thumbnail_url: thumbUrl })
+            };
+
+            if (editId) {
+                const { error } = await supabaseClient.from('news').update(payload).eq('id', editId);
+                if (error) throw error;
+                await logAdminActivity('UPDATE_NEWS', 'news', editId, `Memperbarui berita "${title}"`);
+                Swal.fire('Diperbarui', 'Berita / artikel berhasil diperbarui.', 'success');
+            } else {
+                payload.slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
+                payload.author_id = currentAdminProfile.id;
+                payload.published_at = new Date().toISOString();
+
+                const { error } = await supabaseClient.from('news').insert([payload]);
+                if (error) throw error;
+                await logAdminActivity('CREATE_NEWS', 'news', payload.slug, `Mempublikasikan berita "${title}"`);
+                Swal.fire('Dipublikasikan', 'Berita baru telah berhasil disimpan.', 'success');
+            }
+
+            $('#newsModalAdmin').modal('hide');
+            loadNewsAdmin();
+        } catch (err) {
+            Swal.fire('Gagal', err.message, 'error');
+        } finally {
+            btn.disabled = false;
+        }
     });
 
     async function loadGalleryAdmin() {
