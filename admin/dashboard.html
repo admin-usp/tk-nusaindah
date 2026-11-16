@@ -148,6 +148,11 @@
                         </a>
                     </li>
                     <li class="nav-header">SISTEM & PENGATURAN</li>
+                    <li class="nav-item" id="navItemUsers">
+                        <a href="#" class="nav-link" data-tab="users" onclick="switchAdminTab('users')">
+                            <i class="nav-icon fas fa-users-cog"></i><p>User Management</p>
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-tab="pengaturan" onclick="switchAdminTab('pengaturan')">
                             <i class="nav-icon fas fa-sliders-h"></i><p>Profil & Pengaturan</p>
@@ -499,6 +504,41 @@
                     </div>
                 </div>
 
+                <!-- 11. TAB USER MANAGEMENT & ROLE ACCESS -->
+                <div id="sec-users" class="admin-section">
+                    <div class="card">
+                        <div class="card-header d-flex align-items-center">
+                            <h3 class="card-title font-weight-bold">Manajemen Akun & Hak Akses Pengguna</h3>
+                            <button class="btn btn-sm btn-primary ml-auto" onclick="openUserModalAdmin()">
+                                <i class="fas fa-user-plus mr-1"></i> Tambah Akun Pengguna
+                            </button>
+                        </div>
+                        <div class="card-body table-responsive">
+                            <div class="alert alert-info small">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                <strong>Panduan Role:</strong>
+                                <b>Super Admin</b> (Akses Penuh),
+                                <b>Admin Sekolah</b> (Akademik, PPDB, Konten & Pengaturan),
+                                <b>Operator</b> (Input PPDB, Siswa, Berita & Galeri),
+                                <b>Guru</b> (Lihat Data Siswa & Kelas),
+                                <b>Pengunjung</b> (Akun Portal Publik — diblokir dari Dashboard Admin).
+                            </div>
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nama Lengkap</th>
+                                        <th>Email</th>
+                                        <th>Role / Peran</th>
+                                        <th>Status Akun</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyUsers"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </section>
     </div>
@@ -508,39 +548,81 @@
     </footer>
 </div>
 
+<!-- MODAL TAMBAH AKUN PENGGUNA -->
+<div class="modal fade" id="userModalAdmin" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="formCreateUserAdmin">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title font-weight-bold">Buat Akun Pengguna Baru</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Nama Lengkap *</label>
+                        <input type="text" class="form-control" id="newUserFullName" required placeholder="Contoh: Budi Santoso, S.Pd">
+                    </div>
+                    <div class="form-group">
+                        <label>Email Login *</label>
+                        <input type="email" class="form-control" id="newUserEmail" required placeholder="nama@tknusaindah.sch.id">
+                    </div>
+                    <div class="form-group">
+                        <label>Password Sementara (Min. 6 Karakter) *</label>
+                        <input type="password" class="form-control" id="newUserPassword" minlength="6" required placeholder="******">
+                    </div>
+                    <div class="form-group">
+                        <label>Role / Peran Akses *</label>
+                        <select class="form-control" id="newUserRole" required>
+                            <option value="super_admin">Super Admin (Akses Penuh)</option>
+                            <option value="admin_sekolah">Admin Sekolah</option>
+                            <option value="operator" selected>Operator</option>
+                            <option value="guru">Guru</option>
+                            <option value="pengunjung">Pengunjung</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary" id="btnSaveNewUser">Buat Akun</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- MODAL FORM SISWA -->
 <div class="modal fade" id="studentModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form id="formStudent">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title font-weight-bold">Form Data Siswa</h5>
+                    <h5 class="modal-title font-weight-bold">Tambah / Edit Data Siswa</h5>
                     <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="studentId">
                     <div class="row">
-                        <div class="col-md-6 form-group">
-                            <label>NIS (Nomor Induk Siswa) *</label>
+                        <div class="col-md-4 form-group">
+                            <label>NIS *</label>
                             <input type="text" class="form-control" id="stuNis" required>
                         </div>
-                        <div class="col-md-6 form-group">
+                        <div class="col-md-8 form-group">
                             <label>Nama Lengkap Siswa *</label>
                             <input type="text" class="form-control" id="stuName" required>
                         </div>
                         <div class="col-md-6 form-group">
-                            <label>NIK Siswa (16 Digit)</label>
-                            <input type="text" class="form-control" id="stuNik" maxlength="16" placeholder="Opsional / Sesuai KK">
+                            <label>NIK Siswa</label>
+                            <input type="text" class="form-control" id="stuNik" maxlength="16">
                         </div>
                         <div class="col-md-6 form-group">
                             <label>Tahun Ajaran</label>
-                            <input type="text" class="form-control" id="stuAcademicYear" value="2026/2027" placeholder="2026/2027">
+                            <input type="text" class="form-control" id="stuAcademicYear" value="2026/2027">
                         </div>
-                        <div class="col-md-6 form-group">
+                        <div class="col-md-4 form-group">
                             <label>Tempat Lahir</label>
-                            <input type="text" class="form-control" id="stuBirthPlace" placeholder="Kota kelahiran">
+                            <input type="text" class="form-control" id="stuBirthPlace">
                         </div>
-                        <div class="col-md-6 form-group">
+                        <div class="col-md-4 form-group">
                             <label>Tanggal Lahir</label>
                             <input type="date" class="form-control" id="stuBirthDate">
                         </div>
@@ -551,21 +633,24 @@
                                 <option value="Perempuan">Perempuan</option>
                             </select>
                         </div>
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-6 form-group">
                             <label>Kelompok Kelas</label>
-                            <select class="form-control" id="stuClassId"></select>
+                            <select class="form-control" id="stuClassId">
+                                <option value="">-- Pilih Kelas --</option>
+                            </select>
                         </div>
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-6 form-group">
                             <label>Status Siswa</label>
                             <select class="form-control" id="stuStatus">
                                 <option value="Aktif">Aktif</option>
                                 <option value="Lulus">Lulus</option>
                                 <option value="Pindah">Pindah</option>
+                                <option value="Nonaktif">Nonaktif</option>
                             </select>
                         </div>
                         <div class="col-md-12 form-group">
                             <label>Alamat Lengkap</label>
-                            <textarea class="form-control" id="stuAddress" rows="2" placeholder="Alamat domisili siswa"></textarea>
+                            <textarea class="form-control" id="stuAddress" rows="2"></textarea>
                         </div>
                         <div class="col-md-12 form-group">
                             <label>Upload Foto Siswa <small class="text-muted">(Kosongkan jika tidak ingin mengganti foto saat edit)</small></label>
@@ -864,10 +949,6 @@
     if (typeof window.requireAdminAuth !== 'function') {
         window.requireAdminAuth = async function () {
             try {
-                if (!window.supabaseClient) {
-                    safeRedirectToLogin();
-                    return null;
-                }
                 const { data: { session }, error } = await window.supabaseClient.auth.getSession();
                 if (error || !session) {
                     safeRedirectToLogin();
@@ -878,7 +959,7 @@
                     .select('*')
                     .eq('id', session.user.id)
                     .single();
-                if (profileError || !profile || !profile.is_active) {
+                if (profileError || !profile || !profile.is_active || profile.role === 'pengunjung') {
                     await window.supabaseClient.auth.signOut();
                     safeRedirectToLogin('?error=unauthorized');
                     return null;
@@ -912,9 +993,28 @@
     let ppdbChartInstance = null;
     let groupChartInstance = null;
 
+    function applyRoleAccessControl(role) {
+        if (role !== 'super_admin') {
+            const navUsers = document.getElementById('navItemUsers');
+            if (navUsers) navUsers.style.display = 'none';
+        }
+        if (role === 'guru') {
+            ['ppdb', 'berita', 'galeri', 'pesan', 'pengaturan', 'logs', 'users'].forEach(tab => {
+                const link = document.querySelector(`.nav-sidebar .nav-link[data-tab="${tab}"]`);
+                if (link && link.parentElement) link.parentElement.style.display = 'none';
+            });
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
         const auth = await requireAdminAuth();
         if (!auth) return;
+
+        if (auth.profile.role === 'pengunjung') {
+            await supabaseClient.auth.signOut();
+            safeRedirectToLogin('?error=unauthorized');
+            return;
+        }
 
         // Tampilkan halaman hanya setelah sesi & role admin terverifikasi sah
         document.body.classList.add('auth-verified');
@@ -923,6 +1023,7 @@
         document.getElementById('topAdminName').textContent = currentAdminProfile.full_name;
         document.getElementById('topAdminRole').textContent = `Role: ${currentAdminProfile.role.toUpperCase()}`;
 
+        applyRoleAccessControl(currentAdminProfile.role);
         await refreshAllDashboardData();
     });
 
@@ -957,7 +1058,8 @@
             loadGalleryAdmin(),
             loadMessagesAdmin(),
             loadSchoolSettingsAdmin(),
-            loadActivityLogsAdmin()
+            loadActivityLogsAdmin(),
+            loadUsersAdmin()
         ]);
     }
 
@@ -1600,6 +1702,117 @@
                 <td>${sanitizeHTML(l.details)}</td>
             </tr>
         `).join('');
+    }
+
+    // ==================== 7. USER MANAGEMENT & ROLE ACCESS ====================
+    async function loadUsersAdmin() {
+        const tbody = document.getElementById('tbodyUsers');
+        if (!tbody) return;
+
+        const { data: users, error } = await supabaseClient.from('profiles').select('*').order('created_at', { ascending: false });
+        if (error) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-danger small">${sanitizeHTML(error.message)}</td></tr>`;
+            return;
+        }
+
+        const roleLabels = {
+            super_admin: 'Super Admin',
+            admin_sekolah: 'Admin Sekolah',
+            operator: 'Operator',
+            guru: 'Guru',
+            pengunjung: 'Pengunjung'
+        };
+
+        tbody.innerHTML = (users || []).map(u => {
+            const isSelf = currentAdminProfile && u.id === currentAdminProfile.id;
+            return `
+                <tr>
+                    <td class="font-weight-bold">${sanitizeHTML(u.full_name || '-')}</td>
+                    <td>${sanitizeHTML(u.email)}</td>
+                    <td>
+                        <select class="form-control form-control-sm" ${isSelf ? 'disabled' : ''} onchange="changeUserRole('${u.id}', this.value)">
+                            ${Object.entries(roleLabels).map(([val, label]) => `<option value="${val}" ${u.role === val ? 'selected' : ''}>${label}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td>
+                        <span class="badge badge-${u.is_active ? 'success' : 'danger'}">${u.is_active ? 'Aktif' : 'Nonaktif'}</span>
+                    </td>
+                    <td>
+                        ${isSelf ? '<small class="text-muted">Akun Anda</small>' : `
+                        <button type="button" class="btn btn-xs btn-${u.is_active ? 'warning' : 'success'}" onclick="toggleUserActive('${u.id}', ${!u.is_active})">
+                            ${u.is_active ? 'Nonaktifkan' : 'Aktifkan'}
+                        </button>`}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function openUserModalAdmin() {
+        document.getElementById('formCreateUserAdmin').reset();
+        $('#userModalAdmin').modal('show');
+    }
+
+    document.getElementById('formCreateUserAdmin').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btnSaveNewUser');
+        btn.disabled = true;
+
+        try {
+            const fullName = document.getElementById('newUserFullName').value.trim();
+            const email = document.getElementById('newUserEmail').value.trim();
+            const password = document.getElementById('newUserPassword').value;
+            const role = document.getElementById('newUserRole').value;
+
+            // Gunakan klien sekunder sementara tanpa persistSession agar sesi Super Admin saat ini tidak ter-logout
+            const tempClient = window.supabase.createClient(
+                window.supabaseClient.supabaseUrl,
+                window.supabaseClient.supabaseKey,
+                { auth: { persistSession: false, autoRefreshToken: false } }
+            );
+
+            const { data, error } = await tempClient.auth.signUp({
+                email,
+                password,
+                options: { data: { full_name: fullName, requested_role: role } }
+            });
+
+            if (error) throw error;
+            if (!data.user) throw new Error('Gagal membuat akun autentikasi.');
+
+            const { error: profErr } = await supabaseClient.from('profiles').upsert([{
+                id: data.user.id,
+                full_name: fullName,
+                email,
+                role,
+                is_active: true
+            }]);
+
+            if (profErr) throw profErr;
+
+            await logAdminActivity('CREATE_USER', 'profiles', data.user.id, `Membuat akun ${email} dengan role ${role}`);
+            $('#userModalAdmin').modal('hide');
+            Swal.fire('Berhasil!', `Akun ${email} (${role.toUpperCase()}) berhasil dibuat.`, 'success');
+            loadUsersAdmin();
+        } catch (err) {
+            Swal.fire('Gagal Membuat Akun', err.message, 'error');
+        } finally {
+            btn.disabled = false;
+        }
+    });
+
+    async function changeUserRole(userId, newRole) {
+        const { error } = await supabaseClient.from('profiles').update({ role: newRole }).eq('id', userId);
+        if (error) return Swal.fire('Gagal', error.message, 'error');
+        await logAdminActivity('UPDATE_ROLE', 'profiles', userId, `Mengubah role user menjadi ${newRole}`);
+        Swal.fire('Tersimpan', `Peran pengguna diubah menjadi ${newRole.toUpperCase()}`, 'success');
+    }
+
+    async function toggleUserActive(userId, nextState) {
+        const { error } = await supabaseClient.from('profiles').update({ is_active: nextState }).eq('id', userId);
+        if (error) return Swal.fire('Gagal', error.message, 'error');
+        await logAdminActivity('TOGGLE_USER_STATUS', 'profiles', userId, `Status aktif diubah menjadi ${nextState}`);
+        loadUsersAdmin();
     }
 
     // ==================== HELPER DELETE, EXPORT CSV & BACKUP ====================
