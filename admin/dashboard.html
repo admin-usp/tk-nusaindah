@@ -638,6 +638,15 @@
         window.supabaseClient = window.supabase.createClient(sbUrl, sbKey);
     }
 
+    if (typeof window.sanitizeHTML !== 'function') {
+        window.sanitizeHTML = function (str) {
+            if (!str) return '';
+            const temp = document.createElement('div');
+            temp.textContent = str;
+            return temp.innerHTML;
+        };
+    }
+
     // Fungsi Cetak Kartu Peserta PPDB Terintegrasi Langsung di Admin
     window.printPpdbParticipantCard = async function (regNumber) {
         try {
@@ -751,7 +760,6 @@
             Swal.fire('Gagal Menampilkan Kartu', err.message, 'error');
         }
     };
-    }
 
     if (typeof window.uploadFileToCloud !== 'function') {
         window.uploadFileToCloud = async function (file, bucket = 'school-public', folder = 'general') {
