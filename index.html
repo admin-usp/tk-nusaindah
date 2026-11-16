@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Sistem Informasi Sekolah Taman Kanak-Kanak - Pendidikan Anak Usia Dini Modern, Ceria, dan Berkarakter.">
-    <title>TK NUSA INDAH — Pendidikan Anak Usia Dini</title>
+    <title>TK Nusa Indah — Pendidikan Anak Usia Dini</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,7 +17,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <style>
-         :root {
+        :root {
             --sky-blue: #38bdf8;
             --sky-light: #e0f2fe;
             --pastel-green: #86efac;
@@ -28,28 +27,24 @@
             --text-dark: #1e293b;
             --text-muted: #64748b;
         }
-        
+
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             color: var(--text-dark);
             background-color: #ffffff;
             scroll-behavior: smooth;
         }
-        
-        h1,
-        h2,
-        h3,
-        h4,
-        .navbar-brand {
+
+        h1, h2, h3, h4, .navbar-brand {
             font-family: 'Fredoka', sans-serif;
         }
-        
+
         .navbar {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             box-shadow: 0 4px 20px rgba(56, 189, 248, 0.08);
         }
-        
+
         .nav-link {
             font-weight: 600;
             color: var(--text-dark);
@@ -57,13 +52,12 @@
             border-radius: 50px;
             transition: all 0.25s ease;
         }
-        
-        .nav-link:hover,
-        .nav-link.active {
+
+        .nav-link:hover, .nav-link.active {
             background-color: var(--sky-light);
             color: #0284c7;
         }
-        
+
         .btn-ppdb {
             background: linear-gradient(135deg, #facc15, #f59e0b);
             color: #1e293b;
@@ -74,19 +68,19 @@
             box-shadow: 0 4px 14px rgba(250, 204, 21, 0.4);
             transition: transform 0.2s;
         }
-        
+
         .btn-ppdb:hover {
             transform: translateY(-2px);
             color: #0f172a;
         }
-        
+
         .hero-section {
             background: linear-gradient(135deg, var(--sky-light) 0%, #ffffff 50%, var(--green-soft) 100%);
             padding: 110px 0 80px;
             position: relative;
             overflow: hidden;
         }
-        
+
         .hero-badge {
             background-color: var(--yellow-soft);
             color: #b45309;
@@ -96,18 +90,18 @@
             display: inline-block;
             margin-bottom: 1rem;
         }
-        
+
         .section-padding {
             padding: 80px 0;
         }
-        
+
         .section-title {
             font-size: 2.2rem;
             font-weight: 700;
             color: #0f172a;
             margin-bottom: 0.5rem;
         }
-        
+
         .card-playful {
             border: none;
             border-radius: 24px;
@@ -115,12 +109,12 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             overflow: hidden;
         }
-        
+
         .card-playful:hover {
             transform: translateY(-6px);
             box-shadow: 0 16px 36px rgba(56, 189, 248, 0.15);
         }
-        
+
         .icon-circle {
             width: 64px;
             height: 64px;
@@ -131,22 +125,11 @@
             font-size: 1.6rem;
             margin-bottom: 1.25rem;
         }
-        
-        .bg-sky-soft {
-            background-color: var(--sky-light);
-            color: #0284c7;
-        }
-        
-        .bg-green-soft {
-            background-color: var(--green-soft);
-            color: #16a34a;
-        }
-        
-        .bg-yellow-soft {
-            background-color: var(--yellow-soft);
-            color: #ca8a04;
-        }
-        
+
+        .bg-sky-soft { background-color: var(--sky-light); color: #0284c7; }
+        .bg-green-soft { background-color: var(--green-soft); color: #16a34a; }
+        .bg-yellow-soft { background-color: var(--yellow-soft); color: #ca8a04; }
+
         .teacher-avatar {
             width: 110px;
             height: 110px;
@@ -154,7 +137,7 @@
             border-radius: 50%;
             border: 4px solid var(--sky-light);
         }
-        
+
         .gallery-img {
             height: 220px;
             object-fit: cover;
@@ -162,11 +145,11 @@
             cursor: pointer;
             transition: transform 0.3s ease;
         }
-        
+
         .gallery-img:hover {
             transform: scale(1.04);
         }
-        
+
         footer {
             background-color: #0f172a;
             color: #cbd5e1;
@@ -175,7 +158,6 @@
         }
     </style>
 </head>
-
 <body>
 
     <!-- NAVBAR -->
@@ -185,7 +167,7 @@
                 <span class="bg-warning text-dark rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                     <i class="fa-solid fa-shapes"></i>
                 </span>
-                <span id="navSchoolName">TK NUSA INDAH</span>
+                <span id="navSchoolName">TK Nusa Indah</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
                 <span class="navbar-toggler-icon"></span>
@@ -268,7 +250,7 @@
                     <span class="text-primary fw-bold text-uppercase small">Tentang Kami</span>
                     <h2 class="section-title">Sambutan Kepala Sekolah & Profil</h2>
                     <p class="text-muted" id="principalWelcome">Selamat datang di website resmi sekolah kami. Kami berkomitmen menghadirkan pendidikan anak usia dini yang menyenangkan untuk membangun pondasi karakter anak sejak usia emas.</p>
-
+                    
                     <div class="row g-3 mt-3">
                         <div class="col-md-6">
                             <div class="p-3 rounded-4 bg-sky-soft h-100">
@@ -509,7 +491,7 @@
                     <span class="text-primary fw-bold text-uppercase small">Hubungi Kami</span>
                     <h2 class="section-title">Informasi Kontak & Lokasi</h2>
                     <p class="text-muted mb-4">Punya pertanyaan seputar pendaftaran atau program belajar? Kirimkan pesan kepada kami.</p>
-
+                    
                     <div class="d-flex gap-3 mb-3">
                         <div class="icon-circle bg-sky-soft flex-shrink-0" style="width: 48px; height: 48px; font-size: 1.1rem;"><i class="fa-solid fa-location-dot"></i></div>
                         <div>
@@ -566,7 +548,7 @@
         <div class="container">
             <div class="row g-4 pb-4 border-bottom border-secondary">
                 <div class="col-lg-5">
-                    <h4 class="text-white fw-bold mb-3"><i class="fa-solid fa-shapes text-warning me-2"></i><span id="footerSchoolName">TK NUSA INDAH</span></h4>
+                    <h4 class="text-white fw-bold mb-3"><i class="fa-solid fa-shapes text-warning me-2"></i><span id="footerSchoolName">TK Nusa Indah</span></h4>
                     <p class="small">Lembaga Pendidikan Anak Usia Dini yang berfokus pada pengembangan karakter, kreativitas, dan kemandirian anak dalam suasana penuh keceriaan.</p>
                 </div>
                 <div class="col-lg-3">
@@ -585,7 +567,7 @@
                 </div>
             </div>
             <div class="text-center pt-3 small" id="footerCopyright">
-                © 2026 TK NUSA INDAH. Sistem Informasi Manajemen Sekolah Terintegrasi.
+                © 2026 TK Nusa Indag. Sistem Informasi Manajemen Sekolah Terintegrasi.
             </div>
         </div>
     </footer>
@@ -616,13 +598,13 @@
     <script>
         // Fallback inisialisasi & helper jika preview dijalankan secara terisolasi tanpa relative scripts
         if (typeof window.supabaseClient === 'undefined' && window.supabase) {
-            const sbUrl = window.ENV ? .SUPABASE_URL || 'https://YOUR_PROJECT_ID.supabase.co';
-            const sbKey = window.ENV ? .SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
+            const sbUrl = window.ENV?.SUPABASE_URL || 'https://YOUR_PROJECT_ID.supabase.co';
+            const sbKey = window.ENV?.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
             window.supabaseClient = window.supabase.createClient(sbUrl, sbKey);
         }
 
         if (typeof window.sanitizeHTML !== 'function') {
-            window.sanitizeHTML = function(str) {
+            window.sanitizeHTML = function (str) {
                 if (!str) return '';
                 const temp = document.createElement('div');
                 temp.textContent = str;
@@ -631,13 +613,11 @@
         }
 
         if (typeof window.uploadFileToCloud !== 'function') {
-            window.uploadFileToCloud = async function(file, bucket = 'school-public', folder = 'general') {
+            window.uploadFileToCloud = async function (file, bucket = 'school-public', folder = 'general') {
                 if (!file || !window.supabaseClient) return null;
                 const fileExt = file.name.split('.').pop();
                 const filePath = `${folder}/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
-                const {
-                    error
-                } = await window.supabaseClient.storage.from(bucket).upload(filePath, file);
+                const { error } = await window.supabaseClient.storage.from(bucket).upload(filePath, file);
                 if (error) throw error;
                 if (bucket === 'school-public') {
                     return window.supabaseClient.storage.from(bucket).getPublicUrl(filePath).data.publicUrl;
@@ -646,269 +626,50 @@
             };
         }
 
-        document.addEventListener('DOMContentLoaded', async() => {
-            await loadPublicSchoolData();
-            await loadPublicTeachers();
-            await loadPublicNews();
-            await loadPublicGallery();
+        document.addEventListener('DOMContentLoaded', async () => {
+            await Promise.allSettled([
+                loadPublicSchoolData(),
+                loadPublicTeachers(),
+                loadPublicNews(),
+                loadPublicGallery()
+            ]);
         });
 
         async function loadPublicSchoolData() {
-            try {
-                const {
-                    data: profile
-                } = await supabaseClient.from('school_profile').select('*').limit(1).single();
-                if (profile) {
-                    document.getElementById('navSchoolName').textContent = profile.school_name;
-                    document.getElementById('footerSchoolName').textContent = profile.school_name;
-                    if (profile.tagline) document.getElementById('heroTagline').textContent = profile.tagline;
-                    if (profile.vision) document.getElementById('schoolVision').textContent = profile.vision;
-                    if (profile.mission) document.getElementById('schoolMission').textContent = profile.mission;
-                    if (profile.principal_name) document.getElementById('principalName').textContent = profile.principal_name;
-                    if (profile.principal_welcome) document.getElementById('principalWelcome').textContent = profile.principal_welcome;
-                    if (profile.principal_photo_url) document.getElementById('principalPhoto').src = profile.principal_photo_url;
-                    if (profile.address) document.getElementById('contactAddress').textContent = profile.address;
-                    if (profile.whatsapp || profile.phone) document.getElementById('contactPhone').textContent = profile.whatsapp || profile.phone;
-                    if (profile.email) document.getElementById('contactEmail').textContent = profile.email;
-                }
-
-                const {
-                    data: settings
-                } = await supabaseClient.from('site_settings').select('*').eq('id', 1).single();
-                if (settings) {
-                    if (settings.active_academic_year) document.getElementById('heroAcademicYear').textContent = settings.active_academic_year;
-                    if (settings.hero_banner_url) document.getElementById('heroBannerImg').src = settings.hero_banner_url;
-                    if (settings.footer_text) document.getElementById('footerCopyright').textContent = settings.footer_text;
-                }
-            } catch (err) {
-                console.warn('Menggunakan tampilan default profil sekolah:', err.message);
-            }
-        }
-
+// ... existing code ... -->
         async function loadPublicTeachers() {
             const container = document.getElementById('publicTeachersGrid');
-            const {
-                data: teachers,
-                error
-            } = await supabaseClient
-                .from('teachers')
-                .select('*')
-                .eq('status', 'Aktif')
-                .order('created_at', {
-                    ascending: true
-                });
+            try {
+                const { data: teachers, error } = await supabaseClient
+                    .from('teachers')
+                    .select('*')
+                    .order('created_at', { ascending: true });
 
-            if (error || !teachers || teachers.length === 0) {
-                container.innerHTML = `<div class="col-12 text-center text-muted">Belum ada data guru yang dipublikasikan.</div>`;
-                return;
-            }
+                if (error) throw error;
 
-            container.innerHTML = teachers.map(t => `
-                <div class="col-md-6 col-lg-3">
-                    <div class="card card-playful text-center p-4 h-100">
-                        <img src="${t.photo_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(t.full_name) + '&background=e0f2fe&color=0284c7'}" class="teacher-avatar mx-auto mb-3" alt="${sanitizeHTML(t.full_name)}">
-                        <h5 class="fw-bold mb-1">${sanitizeHTML(t.full_name)}</h5>
-                        <span class="badge bg-sky-soft text-primary mb-2">${sanitizeHTML(t.position)}</span>
-                        <p class="small text-muted mb-1"><i class="fa-solid fa-graduation-cap me-1"></i>${sanitizeHTML(t.education || '-')}</p>
-                        <p class="small text-muted mb-0">${sanitizeHTML(t.bio || '')}</p>
+                const activeTeachers = (teachers || []).filter(t => !t.status || t.status.toLowerCase() === 'aktif');
+
+                if (activeTeachers.length === 0) {
+                    container.innerHTML = `<div class="col-12 text-center text-muted">Belum ada data guru yang dipublikasikan.</div>`;
+                    return;
+                }
+
+                container.innerHTML = activeTeachers.map(t => `
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card card-playful text-center p-4 h-100">
+                            <img src="${t.photo_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(t.full_name) + '&background=e0f2fe&color=0284c7'}" class="teacher-avatar mx-auto mb-3" alt="${sanitizeHTML(t.full_name)}">
+                            <h5 class="fw-bold mb-1">${sanitizeHTML(t.full_name)}</h5>
+                            <span class="badge bg-sky-soft text-primary mb-2">${sanitizeHTML(t.position)}</span>
+                            <p class="small text-muted mb-1"><i class="fa-solid fa-graduation-cap me-1"></i>${sanitizeHTML(t.education || '-')}</p>
+                            <p class="small text-muted mb-0">${sanitizeHTML(t.bio || '')}</p>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            } catch (err) {
+                console.error('Gagal memuat data guru publik:', err);
+                container.innerHTML = `<div class="col-12 text-center text-danger small">Gagal memuat data pendidik: ${sanitizeHTML(err.message)}</div>`;
+            }
         }
 
         async function loadPublicNews() {
-            const container = document.getElementById('publicNewsGrid');
-            const {
-                data: newsList,
-                error
-            } = await supabaseClient
-                .from('news')
-                .select('*, news_categories(name)')
-                .eq('status', 'published')
-                .order('published_at', {
-                    ascending: false
-                })
-                .limit(6);
-
-            if (error || !newsList || newsList.length === 0) {
-                container.innerHTML = `<div class="col-12 text-center text-muted">Belum ada berita terbaru.</div>`;
-                return;
-            }
-
-            window._publicNewsCache = newsList;
-            container.innerHTML = newsList.map((n, idx) => `
-                <div class="col-md-4">
-                    <div class="card card-playful h-100">
-                        <img src="${n.thumbnail_url || 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=600&q=80'}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="${sanitizeHTML(n.title)}">
-                        <div class="card-body d-flex flex-column">
-                            <span class="badge bg-warning text-dark align-self-start mb-2">${sanitizeHTML(n.news_categories?.name || 'Informasi')}</span>
-                            <h5 class="fw-bold">${sanitizeHTML(n.title)}</h5>
-                            <p class="small text-muted flex-grow-1">${sanitizeHTML(n.summary || n.content.substring(0, 100) + '...')}</p>
-                            <button onclick="openNewsModal(${idx})" class="btn btn-outline-primary btn-sm rounded-pill align-self-start mt-2">Baca Selengkapnya</button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function openNewsModal(idx) {
-            const item = window._publicNewsCache[idx];
-            if (!item) return;
-            document.getElementById('modalNewsTitle').textContent = item.title;
-            document.getElementById('modalNewsImg').src = item.thumbnail_url || 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=800&q=80';
-            document.getElementById('modalNewsContent').innerText = item.content;
-            new bootstrap.Modal(document.getElementById('newsDetailModal')).show();
-        }
-
-        async function loadPublicGallery() {
-            const container = document.getElementById('publicGalleryGrid');
-            const {
-                data: items,
-                error
-            } = await supabaseClient
-                .from('gallery_items')
-                .select('*, galleries(title)')
-                .order('created_at', {
-                    ascending: false
-                })
-                .limit(8);
-
-            if (error || !items || items.length === 0) {
-                container.innerHTML = `<div class="col-12 text-center text-muted">Belum ada dokumentasi galeri.</div>`;
-                return;
-            }
-
-            container.innerHTML = items.map(item => `
-                <div class="col-6 col-md-3">
-                    <div class="card card-playful overflow-hidden">
-                        <img src="${item.media_url}" class="gallery-img" alt="${sanitizeHTML(item.caption || 'Kegiatan TK')}" onclick="Swal.fire({imageUrl: '${item.media_url}', title: '${sanitizeHTML(item.caption || item.galleries?.title || 'Dokumentasi')}', showConfirmButton: false})">
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // SUBMIT PPDB ONLINE KE SUPABASE + CLOUD STORAGE
-        document.getElementById('formPpdbOnline').addEventListener('submit', async(e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btnSubmitPpdb');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Mengunggah & Menyimpan...';
-
-            try {
-                const formData = new FormData(e.target);
-                const regNumber = `PPDB-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
-
-                const photoFile = document.getElementById('ppdbPhotoFile').files[0];
-                const aktaFile = document.getElementById('ppdbAktaFile').files[0];
-                const kkFile = document.getElementById('ppdbKkFile').files[0];
-
-                const [photoUrl, aktaUrl, kkUrl] = await Promise.all([
-                    photoFile ? uploadFileToCloud(photoFile, 'school-public', 'ppdb-photos') : null,
-                    aktaFile ? uploadFileToCloud(aktaFile, 'ppdb-documents', 'akta') : null,
-                    kkFile ? uploadFileToCloud(kkFile, 'ppdb-documents', 'kk') : null
-                ]);
-
-                const payload = {
-                    registration_number: regNumber,
-                    child_full_name: formData.get('child_full_name'),
-                    child_nik: formData.get('child_nik'),
-                    gender: formData.get('gender'),
-                    birth_place: formData.get('birth_place'),
-                    birth_date: formData.get('birth_date'),
-                    address: formData.get('address'),
-                    target_group: formData.get('target_group'),
-                    academic_year: document.getElementById('heroAcademicYear').textContent || '2026/2027',
-                    father_name: formData.get('father_name'),
-                    mother_name: formData.get('mother_name'),
-                    parent_whatsapp: formData.get('parent_whatsapp'),
-                    photo_url: photoUrl,
-                    birth_certificate_url: aktaUrl,
-                    family_card_url: kkUrl,
-                    status: 'Menunggu'
-                };
-
-                const {
-                    error
-                } = await supabaseClient.from('admissions').insert([payload]);
-                if (error) throw error;
-
-                e.target.reset();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Pendaftaran Berhasil!',
-                    html: `
-                        <p class="mb-1">Simpan Nomor Registrasi Anda:</p>
-                        <h3 class="text-primary fw-bold">${regNumber}</h3>
-                        <p class="small text-muted mb-3">Silakan cetak Kartu Peserta PPDB sebagai bukti pendaftaran.</p>
-                        <button type="button" onclick="printPpdbParticipantCard('${regNumber}')" class="btn btn-primary rounded-pill px-4 fw-bold">
-                            <i class="fa-solid fa-print me-2"></i>Cetak Kartu Peserta (PDF)
-                        </button>
-                    `,
-                    confirmButtonText: 'Selesai'
-                });
-            } catch (err) {
-                Swal.fire('Gagal Mendaftar', err.message, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>Kirim Pendaftaran PPDB';
-            }
-        });
-
-        // CEK STATUS PENDAFTARAN PPDB + TOMBOL CETAK KARTU
-        document.getElementById('formCheckStatus').addEventListener('submit', async(e) => {
-                    e.preventDefault();
-                    const regNum = document.getElementById('inputCheckRegNum').value.trim().toUpperCase();
-                    const box = document.getElementById('statusResultBox');
-                    box.classList.remove('d-none');
-                    box.innerHTML = '<div class="text-center small"><span class="spinner-border spinner-border-sm"></span> Mencari data...</div>';
-
-                    const {
-                        data,
-                        error
-                    } = await supabaseClient
-                        .from('admissions')
-                        .select('*')
-                        .eq('registration_number', regNum)
-                        .single();
-
-                    if (error || !data) {
-                        box.innerHTML = `<span class="text-danger small fw-semibold"><i class="fa-solid fa-circle-xmark me-1"></i>Nomor registrasi tidak ditemukan.</span>`;
-                        return;
-                    }
-
-                    const badgeColor = data.status === 'Diterima' ? 'success' : (data.status === 'Ditolak' ? 'danger' : (data.status === 'Verifikasi' ? 'info' : 'warning'));
-                    box.innerHTML = `
-                <div class="small">
-                    <div class="fw-bold fs-6">${sanitizeHTML(data.child_full_name)}</div>
-                    <div class="text-muted mb-2">Kelompok: ${sanitizeHTML(data.target_group)}</div>
-                    <div class="mb-2">Status: <span class="badge bg-${badgeColor}">${sanitizeHTML(data.status)}</span></div>
-                    ${data.admin_notes ? `<div class="mb-2 text-muted fst-italic">Catatan: ${sanitizeHTML(data.admin_notes)}</div>` : ''}
-                    <button type="button" onclick="printPpdbParticipantCard('${sanitizeHTML(data.registration_number)}')" class="btn btn-outline-primary btn-sm w-100 rounded-pill mt-1 fw-semibold">
-                        <i class="fa-solid fa-file-pdf me-1"></i> Cetak Kartu Peserta (PDF)
-                    </button>
-                </div>
-            `;
-        });
-
-        // KIRIM PESAN KONTAK
-        document.getElementById('formContactMessage').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const { error } = await supabaseClient.from('contact_messages').insert([{
-                sender_name: formData.get('sender_name'),
-                sender_phone: formData.get('sender_phone'),
-                subject: formData.get('subject'),
-                message: formData.get('message')
-            }]);
-
-            if (error) {
-                Swal.fire('Gagal', error.message, 'error');
-            } else {
-                e.target.reset();
-                Swal.fire('Terkirim!', 'Terima kasih, pesan Anda telah diterima pihak sekolah.', 'success');
-            }
-        });
-    </script>
-</body>
-
-</html>
+// ... existing code ... -->
