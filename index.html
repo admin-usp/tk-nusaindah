@@ -795,6 +795,7 @@
 
                 const payload = {
                     registration_number: regNumber,
+                    academic_year: document.getElementById('heroAcademicYear')?.textContent?.trim() || '2026/2027',
                     child_full_name: formData.get('child_full_name'),
                     child_nik: formData.get('child_nik'),
                     gender: formData.get('gender'),
