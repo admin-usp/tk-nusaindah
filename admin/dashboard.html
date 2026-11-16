@@ -17,12 +17,38 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; visibility: hidden; }
+        body.auth-verified { visibility: visible; }
         .nav-sidebar .nav-link.active { background-color: #0284c7 !important; color: #fff !important; }
         .table-avatar { width: 42px; height: 42px; object-fit: cover; border-radius: 50%; }
         .admin-section { display: none; }
         .admin-section.active { display: block; }
     </style>
+    <script>
+        // Helper aman untuk redirect (menghindari error pada lingkungan blob: preview)
+        function safeRedirectToLogin(query = '') {
+            if (window.location.protocol === 'blob:') {
+                document.body.innerHTML = `
+                    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f1f5f9;font-family:sans-serif;padding:20px;">
+                        <div style="background:#fff;padding:32px;border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,.08);max-width:420px;text-align:center;">
+                            <h3 style="margin-top:0;color:#dc2626;">Akses Ditolak</h3>
+                            <p style="color:#475569;font-size:14px;">Halaman Dashboard Admin tidak dapat diakses secara langsung tanpa sesi login yang sah.</p>
+                            <small style="color:#94a3b8;">(Pada server hosting/GitHub Pages, halaman ini otomatis dialihkan ke <b>admin/login.html</b>)</small>
+                        </div>
+                    </div>`;
+                document.body.style.visibility = 'visible';
+                return;
+            }
+            window.location.replace('login.html' + query);
+        }
+
+        // Cegah tampilan dashboard sebelum sesi login diverifikasi
+        (function () {
+            if (window.location.protocol === 'file:') {
+                safeRedirectToLogin();
+            }
+        })();
+    </script>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
@@ -808,17 +834,13 @@
     if (typeof window.requireAdminAuth !== 'function') {
         window.requireAdminAuth = async function () {
             try {
-                // Jika kredensial Supabase belum dikonfigurasi pada mode preview, jalankan mode demo aman
-                const urlStr = window.supabaseClient?.supabaseUrl || '';
-                if (!urlStr || urlStr.includes('YOUR_PROJECT_ID')) {
-                    return {
-                        session: { user: { id: 'preview-admin' } },
-                        profile: { id: 'preview-admin', full_name: 'Administrator (Preview)', role: 'super_admin', is_active: true }
-                    };
+                if (!window.supabaseClient) {
+                    safeRedirectToLogin();
+                    return null;
                 }
                 const { data: { session }, error } = await window.supabaseClient.auth.getSession();
                 if (error || !session) {
-                    window.location.href = 'login.html';
+                    safeRedirectToLogin();
                     return null;
                 }
                 const { data: profile, error: profileError } = await window.supabaseClient
@@ -828,16 +850,13 @@
                     .single();
                 if (profileError || !profile || !profile.is_active) {
                     await window.supabaseClient.auth.signOut();
-                    window.location.href = 'login.html?error=unauthorized';
+                    safeRedirectToLogin('?error=unauthorized');
                     return null;
                 }
                 return { session, profile };
             } catch (err) {
-                console.warn('Auth check fallback:', err.message);
-                return {
-                    session: { user: { id: 'preview-admin' } },
-                    profile: { id: 'preview-admin', full_name: 'Administrator', role: 'super_admin', is_active: true }
-                };
+                safeRedirectToLogin();
+                return null;
             }
         };
     }
@@ -845,8 +864,18 @@
     if (typeof window.adminLogout !== 'function') {
         window.adminLogout = async function () {
             if (window.supabaseClient) await window.supabaseClient.auth.signOut();
-            window.location.href = 'login.html';
+            safeRedirectToLogin();
         };
+    }
+
+    // Pantau perubahan status autentikasi secara real-time (cegah akses back-button atau URL manual)
+    if (window.supabaseClient?.auth) {
+        window.supabaseClient.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_OUT' || !session) {
+                document.body.classList.remove('auth-verified');
+                safeRedirectToLogin();
+            }
+        });
     }
 
     let currentAdminProfile = null;
@@ -856,6 +885,9 @@
     document.addEventListener('DOMContentLoaded', async () => {
         const auth = await requireAdminAuth();
         if (!auth) return;
+
+        // Tampilkan halaman hanya setelah sesi & role admin terverifikasi sah
+        document.body.classList.add('auth-verified');
 
         currentAdminProfile = auth.profile;
         document.getElementById('topAdminName').textContent = currentAdminProfile.full_name;
