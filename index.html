@@ -348,6 +348,7 @@
             <div class="row g-4" id="publicNewsGrid">
                 <div class="col-12 text-center py-4">
                     <div class="spinner-border text-primary" role="status"></div>
+                    <p class="text-muted mt-2">Memuat berita terbaru...</p>
                 </div>
             </div>
         </div>
@@ -363,6 +364,7 @@
             <div class="row g-3" id="publicGalleryGrid">
                 <div class="col-12 text-center py-4">
                     <div class="spinner-border text-primary" role="status"></div>
+                    <p class="text-muted mt-2">Memuat galeri kegiatan...</p>
                 </div>
             </div>
         </div>
@@ -510,7 +512,7 @@
                         <div class="icon-circle bg-yellow-soft flex-shrink-0" style="width: 48px; height: 48px; font-size: 1.1rem;"><i class="fa-solid fa-envelope"></i></div>
                         <div>
                             <h6 class="fw-bold mb-1">Email Resmi</h6>
-                            <p class="small text-muted mb-0" id="contactEmail">info@tkcerianusantara.sch.id</p>
+                            <p class="small text-muted mb-0" id="contactEmail">info@tknusaindah.sch.id</p>
                         </div>
                     </div>
                 </div>
@@ -567,7 +569,7 @@
                 </div>
             </div>
             <div class="text-center pt-3 small" id="footerCopyright">
-                © 2026 TK Nusa Indag. Sistem Informasi Manajemen Sekolah Terintegrasi.
+                © 2026 TK Nusa Indah. Sistem Informasi Manajemen Sekolah Terintegrasi.
             </div>
         </div>
     </footer>
@@ -596,10 +598,9 @@
     <script src="assets/js/ppdb-card.js"></script>
 
     <script>
-        // Fallback inisialisasi & helper jika preview dijalankan secara terisolasi tanpa relative scripts
         if (typeof window.supabaseClient === 'undefined' && window.supabase) {
-            const sbUrl = window.ENV?.SUPABASE_URL || 'https://YOUR_PROJECT_ID.supabase.co';
-            const sbKey = window.ENV?.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
+            const sbUrl = window.ENV?.SUPABASE_URL || 'https://pqdbcfchsoguokgztzbn.supabase.co';
+            const sbKey = window.ENV?.SUPABASE_ANON_KEY || 'sb_publishable_u7Fd9Ifl6Tr3Im1Dqhb8Wg_2AjUjYvZ';
             window.supabaseClient = window.supabase.createClient(sbUrl, sbKey);
         }
 
@@ -636,7 +637,31 @@
         });
 
         async function loadPublicSchoolData() {
-// ... existing code ... -->
+            try {
+                const { data: profile, error } = await supabaseClient.from('school_profile').select('*').limit(1).single();
+                if (error || !profile) return;
+
+                if (profile.school_name) {
+                    document.title = `${profile.school_name} — Pendidikan Anak Usia Dini`;
+                    document.getElementById('navSchoolName').textContent = profile.school_name;
+                    document.getElementById('footerSchoolName').textContent = profile.school_name;
+                    document.getElementById('footerCopyright').textContent = `© 2026 ${profile.school_name}. Sistem Informasi Manajemen Sekolah Terintegrasi.`;
+                }
+                if (profile.tagline) document.getElementById('heroTagline').textContent = profile.tagline;
+                if (profile.principal_name) document.getElementById('principalName').textContent = profile.principal_name;
+                if (profile.principal_welcome) document.getElementById('principalWelcome').textContent = profile.principal_welcome;
+                if (profile.vision) document.getElementById('schoolVision').textContent = profile.vision;
+                if (profile.mission) document.getElementById('schoolMission').textContent = profile.mission;
+                if (profile.address) document.getElementById('contactAddress').textContent = profile.address;
+                if (profile.whatsapp || profile.phone) document.getElementById('contactPhone').textContent = profile.whatsapp || profile.phone;
+                if (profile.email) document.getElementById('contactEmail').textContent = profile.email;
+                if (profile.principal_photo_url) document.getElementById('principalPhoto').src = profile.principal_photo_url;
+                if (profile.banner_url) document.getElementById('heroBannerImg').src = profile.banner_url;
+            } catch (err) {
+                console.warn('Info profil sekolah:', err.message);
+            }
+        }
+
         async function loadPublicTeachers() {
             const container = document.getElementById('publicTeachersGrid');
             try {
@@ -672,4 +697,194 @@
         }
 
         async function loadPublicNews() {
-// ... existing code ... -->
+            const container = document.getElementById('publicNewsGrid');
+            try {
+                const { data: newsList, error } = await supabaseClient
+                    .from('news')
+                    .select('*')
+                    .order('published_at', { ascending: false })
+                    .limit(6);
+
+                if (error) throw error;
+
+                const publishedNews = (newsList || []).filter(n => !n.status || n.status === 'published');
+
+                if (publishedNews.length === 0) {
+                    container.innerHTML = `<div class="col-12 text-center text-muted">Belum ada berita terbaru yang dipublikasikan.</div>`;
+                    return;
+                }
+
+                window._publicNewsCache = publishedNews;
+                container.innerHTML = publishedNews.map((n, idx) => `
+                    <div class="col-md-4">
+                        <div class="card card-playful h-100">
+                            <img src="${n.thumbnail_url || 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=600&q=80'}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="${sanitizeHTML(n.title)}">
+                            <div class="card-body d-flex flex-column">
+                                <small class="text-primary fw-semibold mb-1"><i class="fa-regular fa-calendar me-1"></i>${new Date(n.published_at || n.created_at).toLocaleDateString('id-ID')}</small>
+                                <h5 class="fw-bold">${sanitizeHTML(n.title)}</h5>
+                                <p class="small text-muted flex-grow-1">${sanitizeHTML(n.summary || (n.content || '').substring(0, 110) + '...')}</p>
+                                <button class="btn btn-outline-primary btn-sm rounded-pill align-self-start" onclick="openNewsModal(${idx})">Baca Selengkapnya</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error('Gagal memuat berita publik:', err);
+                container.innerHTML = `<div class="col-12 text-center text-danger small">Gagal memuat berita: ${sanitizeHTML(err.message)}</div>`;
+            }
+        }
+
+        function openNewsModal(idx) {
+            const item = window._publicNewsCache[idx];
+            if (!item) return;
+            document.getElementById('modalNewsTitle').textContent = item.title;
+            document.getElementById('modalNewsImg').src = item.thumbnail_url || 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=800&q=80';
+            document.getElementById('modalNewsContent').innerText = item.content;
+            new bootstrap.Modal(document.getElementById('newsDetailModal')).show();
+        }
+
+        async function loadPublicGallery() {
+            const container = document.getElementById('publicGalleryGrid');
+            try {
+                const { data: items, error } = await supabaseClient
+                    .from('gallery_items')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(8);
+
+                if (error) throw error;
+
+                if (!items || items.length === 0) {
+                    container.innerHTML = `<div class="col-12 text-center text-muted">Belum ada foto galeri yang diunggah.</div>`;
+                    return;
+                }
+
+                container.innerHTML = items.map(item => `
+                    <div class="col-6 col-md-3">
+                        <div class="card card-playful overflow-hidden">
+                            <img src="${item.media_url}" class="gallery-img" alt="${sanitizeHTML(item.caption || 'Kegiatan Sekolah')}" onclick="Swal.fire({imageUrl: '${item.media_url}', title: '${sanitizeHTML(item.caption || 'Dokumentasi Sekolah')}', showConfirmButton: false})">
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error('Gagal memuat galeri publik:', err);
+                container.innerHTML = `<div class="col-12 text-center text-danger small">Gagal memuat galeri: ${sanitizeHTML(err.message)}</div>`;
+            }
+        }
+
+        // SUBMIT PPDB ONLINE
+        document.getElementById('formPpdbOnline').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitPpdb');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Mengirim Data & Dokumen...';
+
+            try {
+                const formData = new FormData(e.target);
+                const regNumber = `PPDB-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+
+                const photoFile = document.getElementById('ppdbPhotoFile').files[0];
+                const aktaFile = document.getElementById('ppdbAktaFile').files[0];
+                const kkFile = document.getElementById('ppdbKkFile').files[0];
+
+                const [photoUrl, aktaPath, kkPath] = await Promise.all([
+                    photoFile ? uploadFileToCloud(photoFile, 'school-public', 'ppdb-photos') : null,
+                    aktaFile ? uploadFileToCloud(aktaFile, 'ppdb-documents', 'akta') : null,
+                    kkFile ? uploadFileToCloud(kkFile, 'ppdb-documents', 'kk') : null
+                ]);
+
+                const payload = {
+                    registration_number: regNumber,
+                    child_full_name: formData.get('child_full_name'),
+                    child_nik: formData.get('child_nik'),
+                    gender: formData.get('gender'),
+                    birth_place: formData.get('birth_place'),
+                    birth_date: formData.get('birth_date'),
+                    target_group: formData.get('target_group'),
+                    parent_whatsapp: formData.get('parent_whatsapp'),
+                    father_name: formData.get('father_name'),
+                    mother_name: formData.get('mother_name'),
+                    address: formData.get('address'),
+                    photo_url: photoUrl,
+                    birth_certificate_url: aktaPath,
+                    family_card_url: kkPath,
+                    status: 'Menunggu'
+                };
+
+                const { error } = await supabaseClient.from('admissions').insert([payload]);
+                if (error) throw error;
+
+                e.target.reset();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Pendaftaran Berhasil!',
+                    html: `
+                        <p>Simpan Nomor Registrasi Anda untuk pengecekan status:</p>
+                        <h3 class="fw-bold text-primary">${regNumber}</h3>
+                        <button type="button" class="btn btn-warning fw-bold mt-2 rounded-pill px-4" onclick="printPpdbParticipantCard('${regNumber}')">
+                            <i class="fa-solid fa-print me-1"></i> Cetak Kartu Peserta (PDF)
+                        </button>
+                    `
+                });
+            } catch (err) {
+                Swal.fire('Gagal Mendaftar', err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>Kirim Pendaftaran PPDB';
+            }
+        });
+
+        // CEK STATUS PPDB
+        document.getElementById('formCheckStatus').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const regNum = document.getElementById('inputCheckRegNum').value.trim().toUpperCase();
+            const box = document.getElementById('statusResultBox');
+            box.classList.remove('d-none');
+            box.innerHTML = '<span class="text-muted small">Mencari data...</span>';
+
+            const { data, error } = await supabaseClient
+                .from('admissions')
+                .select('*')
+                .eq('registration_number', regNum)
+                .single();
+
+            if (error || !data) {
+                box.innerHTML = '<div class="text-danger small fw-bold">Nomor registrasi tidak ditemukan.</div>';
+                return;
+            }
+
+            const badgeColor = data.status === 'Diterima' ? 'success' : (data.status === 'Ditolak' ? 'danger' : 'warning');
+            box.innerHTML = `
+                <div class="small">
+                    <div class="fw-bold">${sanitizeHTML(data.child_full_name)}</div>
+                    <div class="text-muted mb-2">Kelompok: ${sanitizeHTML(data.target_group)}</div>
+                    <div>Status: <span class="badge bg-${badgeColor}">${sanitizeHTML(data.status)}</span></div>
+                    ${data.admin_notes ? `<div class="mt-2 text-muted fst-italic">Catatan: ${sanitizeHTML(data.admin_notes)}</div>` : ''}
+                    <button type="button" class="btn btn-sm btn-primary w-100 mt-3 rounded-pill fw-semibold" onclick="printPpdbParticipantCard('${sanitizeHTML(data.registration_number)}')">
+                        <i class="fa-solid fa-file-pdf me-1"></i> Cetak Kartu Peserta (PDF)
+                    </button>
+                </div>
+            `;
+        });
+
+        // KIRIM PESAN KONTAK
+        document.getElementById('formContactMessage').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const { error } = await supabaseClient.from('contact_messages').insert([{
+                sender_name: formData.get('sender_name'),
+                sender_phone: formData.get('sender_phone'),
+                subject: formData.get('subject'),
+                message: formData.get('message')
+            }]);
+
+            if (error) {
+                Swal.fire('Gagal', error.message, 'error');
+            } else {
+                e.target.reset();
+                Swal.fire('Terkirim!', 'Pesan Anda telah diterima oleh admin sekolah.', 'success');
+            }
+        });
+    </script>
+</body>
+</html>
