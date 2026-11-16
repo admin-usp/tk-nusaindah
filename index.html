@@ -33,6 +33,10 @@
             color: var(--text-dark);
             background-color: #ffffff;
             scroll-behavior: smooth;
+            visibility: hidden;
+        }
+        body.page-authorized {
+            visibility: visible;
         }
 
         h1, h2, h3, h4, .navbar-brand {
@@ -750,6 +754,12 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
+            // Verifikasi apakah akses publik diizinkan atau memerlukan sesi login aktif
+            const authorized = await verifyPublicAccessGuard();
+            if (!authorized) return;
+
+            document.body.classList.add('page-authorized');
+
             await Promise.allSettled([
                 loadPublicSchoolData(),
                 loadPublicTeachers(),
@@ -758,29 +768,27 @@
             ]);
         });
 
-        async function loadPublicSchoolData() {
+        async function verifyPublicAccessGuard() {
             try {
-                const { data: profile, error } = await supabaseClient.from('school_profile').select('*').limit(1).single();
-                if (error || !profile) return;
+                // Cek apakah admin mengaktifkan pembatasan akses halaman depan di site_settings
+                const { data: settings } = await supabaseClient
+                    .from('site_settings')
+                    .select('setting_key, setting_value')
+                    .eq('setting_key', 'require_login_frontend')
+                    .maybeSingle();
 
-                if (profile.school_name) {
-                    document.title = `${profile.school_name} — Pendidikan Anak Usia Dini`;
-                    document.getElementById('navSchoolName').textContent = profile.school_name;
-                    document.getElementById('footerSchoolName').textContent = profile.school_name;
-                    document.getElementById('footerCopyright').textContent = `© 2026 ${profile.school_name}. Sistem Informasi Manajemen Sekolah Terintegrasi.`;
+                const mustLogin = settings?.setting_value === 'true' || settings?.setting_value === true;
+
+                if (mustLogin) {
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    if (!session && window.location.protocol !== 'blob:') {
+                        window.location.replace('admin/login.html?redirect=frontend');
+                        return false;
+                    }
                 }
-                if (profile.tagline) document.getElementById('heroTagline').textContent = profile.tagline;
-                if (profile.principal_name) document.getElementById('principalName').textContent = profile.principal_name;
-                if (profile.principal_welcome) document.getElementById('principalWelcome').textContent = profile.principal_welcome;
-                if (profile.vision) document.getElementById('schoolVision').textContent = profile.vision;
-                if (profile.mission) document.getElementById('schoolMission').textContent = profile.mission;
-                if (profile.address) document.getElementById('contactAddress').textContent = profile.address;
-                if (profile.whatsapp || profile.phone) document.getElementById('contactPhone').textContent = profile.whatsapp || profile.phone;
-                if (profile.email) document.getElementById('contactEmail').textContent = profile.email;
-                if (profile.principal_photo_url) document.getElementById('principalPhoto').src = profile.principal_photo_url;
-                if (profile.banner_url) document.getElementById('heroBannerImg').src = profile.banner_url;
-            } catch (err) {
-                console.warn('Info profil sekolah:', err.message);
+                return true;
+            } catch (e) {
+                return true;
             }
         }
 
