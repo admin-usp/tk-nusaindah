@@ -1764,114 +1764,21 @@
             const password = document.getElementById('newUserPassword').value;
             const role = document.getElementById('newUserRole').value;
 
-            // Gunakan klien sekunder sementara tanpa persistSession agar sesi Super Admin saat ini tidak ter-logout
-            const tempClient = window.supabase.createClient(
-                window.supabaseClient.supabaseUrl,
-                window.supabaseClient.supabaseKey,
-                { auth: { persistSession: false, autoRefreshToken: false } }
-            );
-
-            const { data, error } = await tempClient.auth.signUp({
-                email,
-                password,
-                options: { data: { full_name: fullName, requested_role: role } }
+            // Gunakan fungsi RPC database agar tidak terkena email rate limit Supabase
+            const { data: newUid, error: rpcErr } = await supabaseClient.rpc('admin_create_user_account', {
+                p_email: email,
+                p_password: password,
+                p_full_name: fullName,
+                p_role: role
             });
 
-            if (error) throw error;
-            if (!data.user) throw new Error('Gagal membuat akun autentikasi.');
+            if (rpcErr) throw rpcErr;
 
-            const { error: profErr } = await supabaseClient.from('profiles').upsert([{
-                id: data.user.id,
-                full_name: fullName,
-                email,
-                role,
-                is_active: true
-            }]);
-
-            if (profErr) throw profErr;
-
-            await logAdminActivity('CREATE_USER', 'profiles', data.user.id, `Membuat akun ${email} dengan role ${role}`);
+            await logAdminActivity('CREATE_USER', 'profiles', newUid, `Membuat akun ${email} dengan role ${role}`);
             $('#userModalAdmin').modal('hide');
-            Swal.fire('Berhasil!', `Akun ${email} (${role.toUpperCase()}) berhasil dibuat.`, 'success');
+            Swal.fire('Berhasil!', `Akun ${email} (${role.toUpperCase()}) berhasil dibuat dan langsung siap login.`, 'success');
             loadUsersAdmin();
         } catch (err) {
             Swal.fire('Gagal Membuat Akun', err.message, 'error');
         } finally {
-            btn.disabled = false;
-        }
-    });
-
-    async function changeUserRole(userId, newRole) {
-        const { error } = await supabaseClient.from('profiles').update({ role: newRole }).eq('id', userId);
-        if (error) return Swal.fire('Gagal', error.message, 'error');
-        await logAdminActivity('UPDATE_ROLE', 'profiles', userId, `Mengubah role user menjadi ${newRole}`);
-        Swal.fire('Tersimpan', `Peran pengguna diubah menjadi ${newRole.toUpperCase()}`, 'success');
-    }
-
-    async function toggleUserActive(userId, nextState) {
-        const { error } = await supabaseClient.from('profiles').update({ is_active: nextState }).eq('id', userId);
-        if (error) return Swal.fire('Gagal', error.message, 'error');
-        await logAdminActivity('TOGGLE_USER_STATUS', 'profiles', userId, `Status aktif diubah menjadi ${nextState}`);
-        loadUsersAdmin();
-    }
-
-    // ==================== HELPER DELETE, EXPORT CSV & BACKUP ====================
-    async function deleteRecord(table, id) {
-        const res = await Swal.fire({
-            title: 'Hapus data ini secara permanen?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            confirmButtonText: 'Ya, Hapus!'
-        });
-        if (!res.isConfirmed) return;
-
-        const { error } = await supabaseClient.from(table).delete().eq('id', id);
-        if (error) return Swal.fire('Gagal', error.message, 'error');
-
-        await logAdminActivity('DELETE', table, id, `Menghapus data dari tabel ${table}`);
-        Swal.fire('Terhapus', 'Data berhasil dihapus dari database.', 'success');
-        refreshAllDashboardData();
-    }
-
-    function exportTableToCSV(tableId, filename) {
-        const rows = document.querySelectorAll(`#${tableId} tr`);
-        const csv = Array.from(rows).map(row =>
-            Array.from(row.querySelectorAll('th, td'))
-                .slice(0, -1)
-                .map(col => `"${col.innerText.replace(/\n/g, ' ').trim()}"`)
-                .join(',')
-        ).join('\n');
-
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        link.click();
-    }
-
-    async function downloadFullDatabaseBackup() {
-        const [students, teachers, admissions, news] = await Promise.all([
-            supabaseClient.from('students').select('*'),
-            supabaseClient.from('teachers').select('*'),
-            supabaseClient.from('admissions').select('*'),
-            supabaseClient.from('news').select('*')
-        ]);
-
-        const backupObj = {
-            exported_at: new Date().toISOString(),
-            students: students.data,
-            teachers: teachers.data,
-            admissions: admissions.data,
-            news: news.data
-        };
-
-        const blob = new Blob([JSON.stringify(backupObj, null, 2)], { type: 'application/json' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `Backup_SIM_TK_${new Date().toISOString().slice(0,10)}.json`;
-        link.click();
-    }
-</script>
-</body>
-</html>
+// ... existing code ... -->
