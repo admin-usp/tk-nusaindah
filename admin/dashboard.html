@@ -98,7 +98,7 @@
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
         <a href="#" onclick="switchAdminTab('dashboard')" class="brand-link text-center">
             <i class="fa-solid fa-shapes text-warning mr-2"></i>
-            <span class="brand-text font-weight-bold">TK NUSA INDAH</span>
+            <span class="brand-text font-weight-bold">SIM TK CERIA</span>
         </a>
 
         <div class="sidebar">
@@ -1229,6 +1229,129 @@
 
             $('#studentModal').modal('hide');
             loadStudentsAdmin();
+        } catch (err) {
+            Swal.fire('Gagal', err.message, 'error');
+        } finally {
+            btn.disabled = false;
+        }
+    });
+
+    // ==================== 3. CRUD DATA GURU ====================
+    async function loadTeachersAdmin() {
+        const { data: teachers, error } = await supabaseClient.from('teachers').select('*').order('created_at', { ascending: false });
+        if (error) {
+            console.error('Gagal memuat data guru:', error.message);
+            return;
+        }
+        const list = teachers || [];
+        window._adminTeachersCache = list;
+        document.getElementById('statTotalGuru').textContent = list.filter(t => t.status === 'Aktif').length;
+
+        document.getElementById('tbodyGuru').innerHTML = list.map((t, idx) => {
+            const statusBadge = t.status === 'Aktif' ? 'success' : 'secondary';
+            return `
+                <tr>
+                    <td><img src="${t.photo_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(t.full_name)}" class="table-avatar"></td>
+                    <td>${sanitizeHTML(t.nip || '-')}</td>
+                    <td class="font-weight-bold">${sanitizeHTML(t.full_name)}</td>
+                    <td>${sanitizeHTML(t.position)}</td>
+                    <td>${sanitizeHTML(t.education || '-')}</td>
+                    <td><span class="badge badge-${statusBadge}">${sanitizeHTML(t.status || 'Aktif')}</span></td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-info" onclick="viewTeacherDetail(${idx})" title="Lihat Detail Guru"><i class="fas fa-eye"></i></button>
+                            <button type="button" class="btn btn-warning" onclick="openTeacherModal(${idx})" title="Edit Data Guru"><i class="fas fa-edit"></i></button>
+                            <button type="button" class="btn btn-danger" onclick="deleteRecord('teachers', '${t.id}')" title="Hapus"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function viewTeacherDetail(idx) {
+        const t = (window._adminTeachersCache || [])[idx];
+        if (!t) return;
+        const avatar = t.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(t.full_name)}&background=e0f2fe&color=0284c7&size=200`;
+
+        Swal.fire({
+            title: 'Detail Tenaga Pendidik',
+            html: `
+                <div class="text-center mb-3">
+                    <img src="${avatar}" class="rounded-circle border shadow-sm" style="width:110px; height:110px; object-fit:cover;">
+                    <h5 class="font-weight-bold mt-2 mb-0">${sanitizeHTML(t.full_name)}</h5>
+                    <span class="badge badge-primary">${sanitizeHTML(t.position)}</span>
+                </div>
+                <table class="table table-sm table-bordered text-left small">
+                    <tr><th style="width:35%">NIP / NUPTK</th><td>${sanitizeHTML(t.nip || '-')}</td></tr>
+                    <tr><th>Pendidikan</th><td>${sanitizeHTML(t.education || '-')}</td></tr>
+                    <tr><th>No. Telepon / WA</th><td>${sanitizeHTML(t.phone || '-')}</td></tr>
+                    <tr><th>Status</th><td><span class="badge badge-${t.status === 'Aktif' ? 'success' : 'secondary'}">${sanitizeHTML(t.status || 'Aktif')}</span></td></tr>
+                    <tr><th>Deskripsi / Bio</th><td>${sanitizeHTML(t.bio || '-')}</td></tr>
+                </table>
+            `,
+            confirmButtonText: 'Tutup'
+        });
+    }
+
+    function openTeacherModal(idx = null) {
+        document.getElementById('formTeacher').reset();
+        const modalTitle = document.querySelector('#teacherModal .modal-title');
+
+        if (idx !== null && (window._adminTeachersCache || [])[idx]) {
+            const t = window._adminTeachersCache[idx];
+            modalTitle.textContent = 'Edit Data Guru';
+            document.getElementById('teacherId').value = t.id;
+            document.getElementById('tchNip').value = t.nip || '';
+            document.getElementById('tchName').value = t.full_name || '';
+            document.getElementById('tchPosition').value = t.position || '';
+            document.getElementById('tchEducation').value = t.education || '';
+            document.getElementById('tchPhone').value = t.phone || '';
+            document.getElementById('tchStatus').value = t.status || 'Aktif';
+            document.getElementById('tchBio').value = t.bio || '';
+        } else {
+            modalTitle.textContent = 'Tambah Data Guru Baru';
+            document.getElementById('teacherId').value = '';
+            document.getElementById('tchStatus').value = 'Aktif';
+        }
+        $('#teacherModal').modal('show');
+    }
+
+    document.getElementById('formTeacher').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btnSaveTeacher');
+        btn.disabled = true;
+
+        try {
+            const editId = document.getElementById('teacherId').value;
+            const file = document.getElementById('tchPhotoFile').files[0];
+            const photoUrl = file ? await uploadFileToCloud(file, 'school-public', 'teachers') : null;
+
+            const payload = {
+                nip: document.getElementById('tchNip').value || null,
+                full_name: document.getElementById('tchName').value,
+                position: document.getElementById('tchPosition').value,
+                education: document.getElementById('tchEducation').value || null,
+                phone: document.getElementById('tchPhone').value || null,
+                status: document.getElementById('tchStatus').value,
+                bio: document.getElementById('tchBio').value || null,
+                ...(photoUrl && { photo_url: photoUrl })
+            };
+
+            if (editId) {
+                const { error } = await supabaseClient.from('teachers').update(payload).eq('id', editId);
+                if (error) throw error;
+                await logAdminActivity('UPDATE_TEACHER', 'teachers', editId, `Memperbarui data guru ${payload.full_name}`);
+                Swal.fire('Diperbarui', 'Data guru berhasil diperbarui.', 'success');
+            } else {
+                const { error } = await supabaseClient.from('teachers').insert([payload]);
+                if (error) throw error;
+                await logAdminActivity('CREATE_TEACHER', 'teachers', payload.full_name, `Menambahkan guru ${payload.full_name}`);
+                Swal.fire('Tersimpan', 'Data guru berhasil ditambahkan.', 'success');
+            }
+
+            $('#teacherModal').modal('hide');
+            loadTeachersAdmin();
         } catch (err) {
             Swal.fire('Gagal', err.message, 'error');
         } finally {
