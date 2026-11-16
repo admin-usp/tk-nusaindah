@@ -1,6 +1,6 @@
 /**
- * Modul Cetak Kartu Peserta PPDB (Print / Save as PDF)
- * Sistem Informasi Manajemen Sekolah TK Terintegrasi
+ * Modul Cetak Kartu Peserta PPDB (Pratinjau Modal + Print / Save as PDF)
+ * Bebas blokir Pop-up Browser & kompatibel di HP maupun Desktop
  */
 
 async function printPpdbParticipantCard(regNumberOrObj) {
@@ -9,341 +9,283 @@ async function printPpdbParticipantCard(regNumberOrObj) {
             throw new Error('Koneksi database Supabase belum siap.');
         }
 
-        const safeText = typeof sanitizeHTML === 'function' ?
-            sanitizeHTML :
-            (str) => String(str || '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+        const safeText = typeof sanitizeHTML === 'function'
+            ? sanitizeHTML
+            : (str) => String(str || '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Menyiapkan Kartu Peserta...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+        }
 
         let admission = null;
-
         if (typeof regNumberOrObj === 'string') {
             const { data, error } = await supabaseClient
                 .from('admissions')
                 .select('*')
                 .eq('registration_number', regNumberOrObj)
-                .single();
+                .maybeSingle();
 
-            if (error || !data) {
-                throw new Error('Data pendaftaran tidak ditemukan untuk dicetak.');
-            }
+            if (error) throw error;
+            if (!data) throw new Error(`Data pendaftaran ${regNumberOrObj} tidak ditemukan.`);
             admission = data;
         } else {
             admission = regNumberOrObj;
         }
 
-        // Ambil identitas sekolah terbaru dari database
+        // Ambil identitas sekolah (gunakan maybeSingle agar tidak error jika tabel masih kosong)
         const { data: school } = await supabaseClient
             .from('school_profile')
             .select('school_name, address, phone, whatsapp, email, principal_name')
             .limit(1)
-            .single();
+            .maybeSingle();
 
-        const schoolName = school ? .school_name || 'TK CERIA NUSANTARA';
-        const schoolAddress = school ? .address || 'Jl. Pendidikan Anak Usia Dini No. 12';
+        const schoolName = school?.school_name || 'TK NUSA INDAH';
+        const schoolAddress = school?.address || 'Jl. Pendidikan Anak Usia Dini No. 12';
         const schoolContact = `Telp/WA: ${school?.whatsapp || school?.phone || '-'} | Email: ${school?.email || '-'}`;
-        const photoUrl = admission.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(admission.child_full_name)}&background=e0f2fe&color=0284c7&size=200`;
-        const regDate = admission.created_at ?
-            new Date(admission.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) :
-            new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+        const photoUrl = admission.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(admission.child_full_name || 'Siswa')}&background=e0f2fe&color=0284c7&size=200`;
+        const regDate = admission.created_at
+            ? new Date(admission.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })
+            : new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
 
         const statusBadgeColor =
             admission.status === 'Diterima' ? '#16a34a' :
             admission.status === 'Ditolak' ? '#dc2626' :
             admission.status === 'Verifikasi' ? '#0284c7' : '#d97706';
 
-        const cardHtml = `
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <title>Kartu Peserta PPDB - ${safeText(admission.registration_number)}</title>
-    <style>
-        @page {
-            size: A5 landscape;
-            margin: 10mm;
-        }
-        * {
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        body {
-            margin: 0;
-            padding: 15px;
-            background: #f1f5f9;
-            color: #1e293b;
-        }
-        .card-wrapper {
-            max-width: 760px;
-            margin: 0 auto;
-            background: #ffffff;
-            border: 2px solid #0284c7;
-            border-radius: 14px;
-            padding: 20px 26px;
-            position: relative;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-        }
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 3px double #0284c7;
-            padding-bottom: 12px;
-            margin-bottom: 16px;
-        }
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-        .logo-box {
-            width: 54px;
-            height: 54px;
-            background: #facc15;
-            color: #0f172a;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 22px;
-        }
-        .school-info h1 {
-            margin: 0;
-            font-size: 18px;
-            color: #0284c7;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .school-info p {
-            margin: 2px 0 0;
-            font-size: 11px;
-            color: #475569;
-        }
-        .doc-title {
-            text-align: right;
-        }
-        .doc-title span {
-            background: #e0f2fe;
-            color: #0369a1;
-            font-weight: 700;
-            font-size: 11px;
-            padding: 4px 10px;
-            border-radius: 20px;
-            display: inline-block;
-        }
-        .doc-title h2 {
-            margin: 5px 0 0;
-            font-size: 14px;
-            color: #0f172a;
-        }
-        .content-grid {
-            display: flex;
-            gap: 20px;
-            align-items: flex-start;
-        }
-        .photo-col {
-            width: 130px;
-            text-align: center;
-            flex-shrink: 0;
-        }
-        .photo-col img {
-            width: 120px;
-            height: 150px;
-            object-fit: cover;
-            border: 2px solid #cbd5e1;
-            border-radius: 8px;
-            background: #f8fafc;
-        }
-        .reg-box {
-            margin-top: 8px;
-            background: #f8fafc;
-            border: 1px dashed #0284c7;
-            padding: 6px;
-            border-radius: 6px;
-        }
-        .reg-box small {
-            display: block;
-            font-size: 9px;
-            color: #64748b;
-        }
-        .reg-box strong {
-            font-size: 12px;
-            color: #0284c7;
-        }
-        .data-col {
-            flex-grow: 1;
-        }
-        table.bio-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12.5px;
-        }
-        table.bio-table td {
-            padding: 4px 6px;
-            vertical-align: top;
-        }
-        table.bio-table td.label {
-            width: 165px;
-            color: #475569;
-            font-weight: 600;
-        }
-        .status-pill {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 12px;
-            color: #fff;
-            font-weight: 700;
-            font-size: 11px;
-            background: ${statusBadgeColor};
-        }
-        .footer-grid {
-            margin-top: 18px;
-            padding-top: 12px;
-            border-top: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            font-size: 11px;
-        }
-        .notes {
-            max-width: 62%;
-            color: #475569;
-            line-height: 1.45;
-        }
-        .signature {
-            text-align: center;
-            min-width: 180px;
-        }
-        .signature .space {
-            height: 45px;
-        }
-        .no-print-bar {
-            text-align: center;
-            margin-bottom: 14px;
-        }
-        .btn-print {
-            background: #0284c7;
-            color: #fff;
-            border: none;
-            padding: 10px 22px;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 13px;
-        }
-        @media print {
-            body { background: #fff; padding: 0; }
-            .card-wrapper { box-shadow: none; border-width: 1.5px; }
-            .no-print-bar { display: none; }
-        }
-    </style>
-</head>
-<body>
-    <div class="no-print-bar">
-        <button class="btn-print" onclick="window.print()">🖨️ Cetak / Simpan Sebagai PDF</button>
-    </div>
+        // Hapus overlay lama jika ada
+        const existingModal = document.getElementById('ppdbPrintOverlayModal');
+        if (existingModal) existingModal.remove();
 
-    <div class="card-wrapper">
-        <div class="header">
-            <div class="header-left">
-                <div class="logo-box">TK</div>
-                <div class="school-info">
-                    <h1>${safeText(schoolName)}</h1>
-                    <p>${safeText(schoolAddress)}</p>
-                    <p>${safeText(schoolContact)}</p>
+        const overlay = document.createElement('div');
+        overlay.id = 'ppdbPrintOverlayModal';
+        overlay.innerHTML = `
+            <style>
+                #ppdbPrintOverlayModal {
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(15, 23, 42, 0.78);
+                    z-index: 99999;
+                    overflow-y: auto;
+                    padding: 20px 12px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                }
+                .ppdb-toolbar {
+                    width: 100%;
+                    max-width: 780px;
+                    background: #1e293b;
+                    color: #fff;
+                    padding: 12px 18px;
+                    border-radius: 12px;
+                    margin-bottom: 14px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    gap: 10px;
+                    flex-wrap: wrap;
+                }
+                .ppdb-btn-action {
+                    border: none;
+                    padding: 8px 16px;
+                    border-radius: 8px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    font-size: 13px;
+                }
+                .ppdb-btn-print { background: #facc15; color: #0f172a; }
+                .ppdb-btn-close { background: #ef4444; color: #fff; }
+                #ppdbPrintableArea {
+                    width: 100%;
+                    max-width: 780px;
+                    background: #ffffff;
+                    border: 2.5px solid #0284c7;
+                    border-radius: 14px;
+                    padding: 24px 28px;
+                    color: #1e293b;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    box-shadow: 0 12px 35px rgba(0,0,0,0.25);
+                }
+                .ppdb-card-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    border-bottom: 3px double #0284c7;
+                    padding-bottom: 12px;
+                    margin-bottom: 18px;
+                    gap: 12px;
+                }
+                .ppdb-logo-badge {
+                    width: 52px;
+                    height: 52px;
+                    background: #facc15;
+                    color: #0f172a;
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 800;
+                    font-size: 20px;
+                    flex-shrink: 0;
+                }
+                .ppdb-card-body {
+                    display: flex;
+                    gap: 20px;
+                    align-items: flex-start;
+                    flex-wrap: wrap;
+                }
+                .ppdb-photo-box {
+                    width: 125px;
+                    text-align: center;
+                    flex-shrink: 0;
+                }
+                .ppdb-photo-box img {
+                    width: 115px;
+                    height: 145px;
+                    object-fit: cover;
+                    border: 2px solid #cbd5e1;
+                    border-radius: 8px;
+                }
+                .ppdb-reg-tag {
+                    margin-top: 8px;
+                    background: #f0f9ff;
+                    border: 1px dashed #0284c7;
+                    padding: 5px;
+                    border-radius: 6px;
+                    font-size: 11px;
+                }
+                .ppdb-bio-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 13px;
+                }
+                .ppdb-bio-table td {
+                    padding: 4px 6px;
+                    vertical-align: top;
+                }
+                .ppdb-bio-table td.lbl {
+                    width: 165px;
+                    font-weight: 600;
+                    color: #475569;
+                }
+                .ppdb-card-footer {
+                    margin-top: 18px;
+                    padding-top: 12px;
+                    border-top: 1px solid #e2e8f0;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-end;
+                    font-size: 11.5px;
+                    gap: 12px;
+                }
+                @media print {
+                    body * { visibility: hidden !important; }
+                    #ppdbPrintOverlayModal, #ppdbPrintableArea, #ppdbPrintableArea * {
+                        visibility: visible !important;
+                    }
+                    #ppdbPrintOverlayModal {
+                        position: absolute;
+                        left: 0;
+                        top: 0;
+                        background: #fff !important;
+                        padding: 0 !important;
+                    }
+                    .ppdb-toolbar { display: none !important; }
+                    #ppdbPrintableArea {
+                        box-shadow: none !important;
+                        max-width: 100% !important;
+                        border: 2px solid #0284c7 !important;
+                    }
+                }
+            </style>
+
+            <div class="ppdb-toolbar">
+                <div style="font-weight: 700; font-size: 14px;">
+                    <i class="fas fa-id-card mr-1"></i> Pratinjau Kartu Peserta PPDB — ${safeText(admission.registration_number)}
                 </div>
-            </div>
-            <div class="doc-title">
-                <span>TAHUN AJARAN ${safeText(admission.academic_year || '2026/2027')}</span>
-                <h2>KARTU PESERTA PPDB</h2>
-            </div>
-        </div>
-
-        <div class="content-grid">
-            <div class="photo-col">
-                <img src="${photoUrl}" alt="Foto Peserta">
-                <div class="reg-box">
-                    <small>NO. REGISTRASI</small>
-                    <strong>${safeText(admission.registration_number)}</strong>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="ppdb-btn-action ppdb-btn-print" onclick="window.print()">
+                        🖨️ Cetak / Simpan PDF
+                    </button>
+                    <button type="button" class="ppdb-btn-action ppdb-btn-close" onclick="document.getElementById('ppdbPrintOverlayModal').remove()">
+                        ✕ Tutup
+                    </button>
                 </div>
             </div>
 
-            <div class="data-col">
-                <table class="bio-table">
-                    <tr>
-                        <td class="label">Nama Lengkap Anak</td>
-                        <td>: <strong>${safeText(admission.child_full_name)}</strong></td>
-                    </tr>
-                    <tr>
-                        <td class="label">NIK Anak</td>
-                        <td>: ${safeText(admission.child_nik || '-')}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Tempat, Tanggal Lahir</td>
-                        <td>: ${safeText(admission.birth_place)}, ${safeText(admission.birth_date)}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Jenis Kelamin</td>
-                        <td>: ${safeText(admission.gender)}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Kelompok Belajar</td>
-                        <td>: <strong>${safeText(admission.target_group)}</strong></td>
-                    </tr>
-                    <tr>
-                        <td class="label">Nama Orang Tua (Ayah/Ibu)</td>
-                        <td>: ${safeText(admission.father_name)} / ${safeText(admission.mother_name)}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">No. WhatsApp Orang Tua</td>
-                        <td>: ${safeText(admission.parent_whatsapp)}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Alamat</td>
-                        <td>: ${safeText(admission.address)}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Status Pendaftaran</td>
-                        <td>: <span class="status-pill">${safeText((admission.status || 'Menunggu').toUpperCase())}</span></td>
-                    </tr>
-                </table>
-            </div>
-        </div>
+            <div id="ppdbPrintableArea">
+                <div class="ppdb-card-header">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="ppdb-logo-badge">TK</div>
+                        <div>
+                            <h3 style="margin: 0; font-size: 18px; color: #0284c7; font-weight: 800; text-transform: uppercase;">${safeText(schoolName)}</h3>
+                            <div style="font-size: 11px; color: #475569;">${safeText(schoolAddress)}</div>
+                            <div style="font-size: 11px; color: #475569;">${safeText(schoolContact)}</div>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="background: #e0f2fe; color: #0369a1; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 20px;">
+                            TAHUN AJARAN ${safeText(admission.academic_year || '2026/2027')}
+                        </span>
+                        <div style="font-weight: 800; font-size: 14px; margin-top: 4px; color: #0f172a;">KARTU PESERTA PPDB</div>
+                    </div>
+                </div>
 
-        <div class="footer-grid">
-            <div class="notes">
-                <strong>Catatan Penting:</strong><br>
-                1. Kartu ini merupakan bukti sah pendaftaran PPDB Online.<br>
-                2. Harap membawa kartu ini beserta dokumen asli (Akta Kelahiran & KK) saat verifikasi tatap muka / daftar ulang di sekolah.
-            </div>
-            <div class="signature">
-                <div>Dicetak pada: ${regDate}</div>
-                <div>Panitia PPDB Sekolah,</div>
-                <div class="space"></div>
-                <strong>( _______________________ )</strong>
-            </div>
-        </div>
-    </div>
+                <div class="ppdb-card-body">
+                    <div class="ppdb-photo-box">
+                        <img src="${photoUrl}" alt="Foto Calon Siswa">
+                        <div class="ppdb-reg-tag">
+                            <div style="font-size: 9px; color: #64748b;">NO. REGISTRASI</div>
+                            <strong style="color: #0284c7; font-size: 12px;">${safeText(admission.registration_number)}</strong>
+                        </div>
+                    </div>
 
-    <script>
-        window.onload = function() {
-            setTimeout(() => window.print(), 400);
-        };
-    <\/script>
-</body>
-</html>`;
+                    <div style="flex: 1; min-width: 260px;">
+                        <table class="ppdb-bio-table">
+                            <tr><td class="lbl">Nama Lengkap Anak</td><td>: <strong>${safeText(admission.child_full_name)}</strong></td></tr>
+                            <tr><td class="lbl">NIK Anak</td><td>: ${safeText(admission.child_nik || '-')}</td></tr>
+                            <tr><td class="lbl">Tempat, Tanggal Lahir</td><td>: ${safeText(admission.birth_place)}, ${safeText(admission.birth_date)}</td></tr>
+                            <tr><td class="lbl">Jenis Kelamin</td><td>: ${safeText(admission.gender)}</td></tr>
+                            <tr><td class="lbl">Kelompok Belajar</td><td>: <strong>${safeText(admission.target_group)}</strong></td></tr>
+                            <tr><td class="lbl">Nama Ayah / Ibu</td><td>: ${safeText(admission.father_name)} / ${safeText(admission.mother_name)}</td></tr>
+                            <tr><td class="lbl">No. WhatsApp Ortu</td><td>: ${safeText(admission.parent_whatsapp)}</td></tr>
+                            <tr><td class="lbl">Alamat</td><td>: ${safeText(admission.address)}</td></tr>
+                            <tr>
+                                <td class="lbl">Status Pendaftaran</td>
+                                <td>: <span style="background: ${statusBadgeColor}; color: #fff; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 700;">${safeText((admission.status || 'Menunggu').toUpperCase())}</span></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
 
-        const printWin = window.open('', '_blank', 'width=860,height=620');
-        if (!printWin) {
-            throw new Error('Pop-up diblokir browser. Harap izinkan pop-up untuk mencetak kartu PDF.');
-        }
-        printWin.document.open();
-        printWin.document.write(cardHtml);
-        printWin.document.close();
+                <div class="ppdb-card-footer">
+                    <div style="max-width: 62%; color: #475569; line-height: 1.4;">
+                        <strong>Catatan Penting:</strong><br>
+                        1. Kartu ini adalah bukti sah pendaftaran PPDB Online.<br>
+                        2. Harap membawa kartu ini beserta dokumen asli (Akta Kelahiran & KK) saat verifikasi di sekolah.
+                    </div>
+                    <div style="text-align: center; min-width: 170px;">
+                        <div>Tanggal Daftar: ${regDate}</div>
+                        <div>Panitia PPDB Sekolah,</div>
+                        <div style="height: 44px;"></div>
+                        <strong>( _____________________ )</strong>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        if (typeof Swal !== 'undefined') Swal.close();
+        document.body.appendChild(overlay);
     } catch (err) {
         if (typeof Swal !== 'undefined') {
-            Swal.fire('Gagal Mencetak Kartu', err.message, 'error');
+            Swal.fire('Gagal Menampilkan Kartu', err.message, 'error');
         } else {
-            console.error('Gagal Mencetak Kartu:', err.message);
+            console.error('Gagal Menampilkan Kartu:', err.message);
         }
     }
 }
+window.printPpdbParticipantCard = printPpdbParticipantCard;
