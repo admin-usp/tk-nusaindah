@@ -17,12 +17,38 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; visibility: hidden; }
+        body.auth-verified { visibility: visible; }
         .nav-sidebar .nav-link.active { background-color: #0284c7 !important; color: #fff !important; }
         .table-avatar { width: 42px; height: 42px; object-fit: cover; border-radius: 50%; }
         .admin-section { display: none; }
         .admin-section.active { display: block; }
     </style>
+    <script>
+        // Helper aman untuk redirect (menghindari error pada lingkungan blob: preview)
+        function safeRedirectToLogin(query = '') {
+            if (window.location.protocol === 'blob:') {
+                document.body.innerHTML = `
+                    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f1f5f9;font-family:sans-serif;padding:20px;">
+                        <div style="background:#fff;padding:32px;border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,.08);max-width:420px;text-align:center;">
+                            <h3 style="margin-top:0;color:#dc2626;">Akses Ditolak</h3>
+                            <p style="color:#475569;font-size:14px;">Halaman Dashboard Admin tidak dapat diakses secara langsung tanpa sesi login yang sah.</p>
+                            <small style="color:#94a3b8;">(Pada server hosting/GitHub Pages, halaman ini otomatis dialihkan ke <b>admin/login.html</b>)</small>
+                        </div>
+                    </div>`;
+                document.body.style.visibility = 'visible';
+                return;
+            }
+            window.location.replace('login.html' + query);
+        }
+
+        // Cegah tampilan dashboard sebelum sesi login diverifikasi
+        (function () {
+            if (window.location.protocol === 'file:') {
+                safeRedirectToLogin();
+            }
+        })();
+    </script>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
@@ -72,7 +98,7 @@
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
         <a href="#" onclick="switchAdminTab('dashboard')" class="brand-link text-center">
             <i class="fa-solid fa-shapes text-warning mr-2"></i>
-            <span class="brand-text font-weight-bold">SIM TK CERIA</span>
+            <span class="brand-text font-weight-bold">TK NUSA INDAH</span>
         </a>
 
         <div class="sidebar">
@@ -502,6 +528,22 @@
                             <label>Nama Lengkap Siswa *</label>
                             <input type="text" class="form-control" id="stuName" required>
                         </div>
+                        <div class="col-md-6 form-group">
+                            <label>NIK Siswa (16 Digit)</label>
+                            <input type="text" class="form-control" id="stuNik" maxlength="16" placeholder="Opsional / Sesuai KK">
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>Tahun Ajaran</label>
+                            <input type="text" class="form-control" id="stuAcademicYear" value="2026/2027" placeholder="2026/2027">
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>Tempat Lahir</label>
+                            <input type="text" class="form-control" id="stuBirthPlace" placeholder="Kota kelahiran">
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>Tanggal Lahir</label>
+                            <input type="date" class="form-control" id="stuBirthDate">
+                        </div>
                         <div class="col-md-4 form-group">
                             <label>Jenis Kelamin *</label>
                             <select class="form-control" id="stuGender" required>
@@ -522,14 +564,18 @@
                             </select>
                         </div>
                         <div class="col-md-12 form-group">
-                            <label>Upload Foto Siswa</label>
+                            <label>Alamat Lengkap</label>
+                            <textarea class="form-control" id="stuAddress" rows="2" placeholder="Alamat domisili siswa"></textarea>
+                        </div>
+                        <div class="col-md-12 form-group">
+                            <label>Upload Foto Siswa <small class="text-muted">(Kosongkan jika tidak ingin mengganti foto saat edit)</small></label>
                             <input type="file" class="form-control-file" id="stuPhotoFile" accept="image/*">
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Data Siswa</button>
+                    <button type="submit" class="btn btn-primary" id="btnSaveStudent">Simpan Data Siswa</button>
                 </div>
             </form>
         </div>
@@ -808,17 +854,13 @@
     if (typeof window.requireAdminAuth !== 'function') {
         window.requireAdminAuth = async function () {
             try {
-                // Jika kredensial Supabase belum dikonfigurasi pada mode preview, jalankan mode demo aman
-                const urlStr = window.supabaseClient?.supabaseUrl || '';
-                if (!urlStr || urlStr.includes('YOUR_PROJECT_ID')) {
-                    return {
-                        session: { user: { id: 'preview-admin' } },
-                        profile: { id: 'preview-admin', full_name: 'Administrator (Preview)', role: 'super_admin', is_active: true }
-                    };
+                if (!window.supabaseClient) {
+                    safeRedirectToLogin();
+                    return null;
                 }
                 const { data: { session }, error } = await window.supabaseClient.auth.getSession();
                 if (error || !session) {
-                    window.location.href = 'login.html';
+                    safeRedirectToLogin();
                     return null;
                 }
                 const { data: profile, error: profileError } = await window.supabaseClient
@@ -828,16 +870,13 @@
                     .single();
                 if (profileError || !profile || !profile.is_active) {
                     await window.supabaseClient.auth.signOut();
-                    window.location.href = 'login.html?error=unauthorized';
+                    safeRedirectToLogin('?error=unauthorized');
                     return null;
                 }
                 return { session, profile };
             } catch (err) {
-                console.warn('Auth check fallback:', err.message);
-                return {
-                    session: { user: { id: 'preview-admin' } },
-                    profile: { id: 'preview-admin', full_name: 'Administrator', role: 'super_admin', is_active: true }
-                };
+                safeRedirectToLogin();
+                return null;
             }
         };
     }
@@ -845,8 +884,18 @@
     if (typeof window.adminLogout !== 'function') {
         window.adminLogout = async function () {
             if (window.supabaseClient) await window.supabaseClient.auth.signOut();
-            window.location.href = 'login.html';
+            safeRedirectToLogin();
         };
+    }
+
+    // Pantau perubahan status autentikasi secara real-time (cegah akses back-button atau URL manual)
+    if (window.supabaseClient?.auth) {
+        window.supabaseClient.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_OUT' || !session) {
+                document.body.classList.remove('auth-verified');
+                safeRedirectToLogin();
+            }
+        });
     }
 
     let currentAdminProfile = null;
@@ -856,6 +905,9 @@
     document.addEventListener('DOMContentLoaded', async () => {
         const auth = await requireAdminAuth();
         if (!auth) return;
+
+        // Tampilkan halaman hanya setelah sesi & role admin terverifikasi sah
+        document.body.classList.add('auth-verified');
 
         currentAdminProfile = auth.profile;
         document.getElementById('topAdminName').textContent = currentAdminProfile.full_name;
@@ -1058,161 +1110,125 @@
     async function loadStudentsAdmin() {
         const { data: students } = await supabaseClient.from('students').select('*, classes(class_name)').order('created_at', { ascending: false });
         const list = students || [];
+        window._adminStudentsCache = list;
         document.getElementById('statTotalSiswa').textContent = list.filter(s => s.status === 'Aktif').length;
 
-        document.getElementById('tbodySiswa').innerHTML = list.map(s => `
-            <tr>
-                <td><img src="${s.photo_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s.full_name)}" class="table-avatar"></td>
-                <td>${sanitizeHTML(s.nis || '-')}</td>
-                <td class="font-weight-bold">${sanitizeHTML(s.full_name)}</td>
-                <td>${sanitizeHTML(s.gender)}</td>
-                <td>${sanitizeHTML(s.classes?.class_name || 'Belum diatur')}</td>
-                <td><span class="badge badge-success">${sanitizeHTML(s.status)}</span></td>
-                <td>
-                    <button class="btn btn-xs btn-danger" onclick="deleteRecord('students', '${s.id}')"><i class="fas fa-trash"></i> Hapus</button>
-                </td>
-            </tr>
-        `).join('');
+        document.getElementById('tbodySiswa').innerHTML = list.map((s, idx) => {
+            const statusBadge = s.status === 'Aktif' ? 'success' : (s.status === 'Lulus' ? 'info' : 'secondary');
+            return `
+                <tr>
+                    <td><img src="${s.photo_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s.full_name)}" class="table-avatar"></td>
+                    <td>${sanitizeHTML(s.nis || '-')}</td>
+                    <td class="font-weight-bold">${sanitizeHTML(s.full_name)}</td>
+                    <td>${sanitizeHTML(s.gender)}</td>
+                    <td>${sanitizeHTML(s.classes?.class_name || 'Belum diatur')}</td>
+                    <td><span class="badge badge-${statusBadge}">${sanitizeHTML(s.status)}</span></td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-info" onclick="viewStudentDetail(${idx})" title="Lihat Detail Siswa"><i class="fas fa-eye"></i></button>
+                            <button type="button" class="btn btn-warning" onclick="openStudentModal(${idx})" title="Edit Data Siswa"><i class="fas fa-edit"></i></button>
+                            <button type="button" class="btn btn-danger" onclick="deleteRecord('students', '${s.id}')" title="Hapus"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
     }
 
-    function openStudentModal() {
-        document.getElementById('formStudent').reset();
-        document.getElementById('studentId').value = '';
-        $('#studentModal').modal('show');
-    }
-
-    document.getElementById('formStudent').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const file = document.getElementById('stuPhotoFile').files[0];
-        const photoUrl = file ? await uploadFileToCloud(file, 'school-public', 'students') : null;
-
-        const payload = {
-            nis: document.getElementById('stuNis').value,
-            full_name: document.getElementById('stuName').value,
-            gender: document.getElementById('stuGender').value,
-            class_id: document.getElementById('stuClassId').value || null,
-            status: document.getElementById('stuStatus').value,
-            ...(photoUrl && { photo_url: photoUrl })
-        };
-
-        const { error } = await supabaseClient.from('students').insert([payload]);
-        if (error) return Swal.fire('Gagal', error.message, 'error');
-
-        $('#studentModal').modal('hide');
-        await logAdminActivity('CREATE_STUDENT', 'students', payload.nis, `Menambahkan siswa ${payload.full_name}`);
-        Swal.fire('Tersimpan', 'Data siswa berhasil ditambahkan.', 'success');
-        loadStudentsAdmin();
-    });
-
-    // ==================== 3. CRUD DATA GURU ====================
-    async function loadTeachersAdmin() {
-        const { data: teachers } = await supabaseClient.from('teachers').select('*').order('created_at', { ascending: false });
-        const list = teachers || [];
-        window._adminTeachersCache = list;
-        document.getElementById('statTotalGuru').textContent = list.length;
-
-        document.getElementById('tbodyGuru').innerHTML = list.map((t, idx) => `
-            <tr>
-                <td><img src="${t.photo_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(t.full_name)}" class="table-avatar"></td>
-                <td>${sanitizeHTML(t.nip || '-')}</td>
-                <td class="font-weight-bold">${sanitizeHTML(t.full_name)}</td>
-                <td>${sanitizeHTML(t.position)}</td>
-                <td>${sanitizeHTML(t.education || '-')}</td>
-                <td><span class="badge badge-${(t.status || 'Aktif') === 'Aktif' ? 'info' : 'secondary'}">${sanitizeHTML(t.status || 'Aktif')}</span></td>
-                <td>
-                    <div class="btn-group btn-group-sm">
-                        <button type="button" class="btn btn-info" onclick="viewTeacherDetail(${idx})" title="Lihat Detail Guru"><i class="fas fa-eye"></i></button>
-                        <button type="button" class="btn btn-warning" onclick="openTeacherModal(${idx})" title="Edit Data Guru"><i class="fas fa-edit"></i></button>
-                        <button type="button" class="btn btn-danger" onclick="deleteRecord('teachers', '${t.id}')" title="Hapus"><i class="fas fa-trash"></i></button>
-                    </div>
-                </td>
-            </tr>
-        `).join('');
-    }
-
-    function viewTeacherDetail(idx) {
-        const t = (window._adminTeachersCache || [])[idx];
-        if (!t) return;
-        const avatar = t.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(t.full_name)}&background=e0f2fe&color=0284c7&size=200`;
+    function viewStudentDetail(idx) {
+        const s = (window._adminStudentsCache || [])[idx];
+        if (!s) return;
+        const avatar = s.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(s.full_name)}&background=e0f2fe&color=0284c7&size=200`;
+        const ttl = (s.birth_place || s.birth_date) ? `${s.birth_place || '-'}, ${s.birth_date || '-'}` : '-';
 
         Swal.fire({
-            title: 'Detail Tenaga Pendidik',
+            title: 'Detail Data Peserta Didik',
             html: `
                 <div class="text-center mb-3">
                     <img src="${avatar}" class="rounded-circle border shadow-sm" style="width:110px; height:110px; object-fit:cover;">
-                    <h5 class="font-weight-bold mt-2 mb-0">${sanitizeHTML(t.full_name)}</h5>
-                    <span class="badge badge-primary">${sanitizeHTML(t.position)}</span>
+                    <h5 class="font-weight-bold mt-2 mb-0">${sanitizeHTML(s.full_name)}</h5>
+                    <span class="badge badge-primary">NIS: ${sanitizeHTML(s.nis || '-')}</span>
                 </div>
                 <table class="table table-sm table-bordered text-left small">
-                    <tr><th style="width:38%">NIP / NUPTK</th><td>${sanitizeHTML(t.nip || '-')}</td></tr>
-                    <tr><th>Pendidikan</th><td>${sanitizeHTML(t.education || '-')}</td></tr>
-                    <tr><th>No. Telepon / WA</th><td>${sanitizeHTML(t.phone || '-')}</td></tr>
-                    <tr><th>Status</th><td>${sanitizeHTML(t.status || 'Aktif')}</td></tr>
-                    <tr><th>Bio / Deskripsi</th><td>${sanitizeHTML(t.bio || '-')}</td></tr>
+                    <tr><th style="width:38%">No. Registrasi PPDB</th><td>${sanitizeHTML(s.registration_number || '-')}</td></tr>
+                    <tr><th>NIK Siswa</th><td>${sanitizeHTML(s.nik || '-')}</td></tr>
+                    <tr><th>Jenis Kelamin</th><td>${sanitizeHTML(s.gender || '-')}</td></tr>
+                    <tr><th>Tempat, Tgl Lahir</th><td>${sanitizeHTML(ttl)}</td></tr>
+                    <tr><th>Kelompok Kelas</th><td><strong>${sanitizeHTML(s.classes?.class_name || 'Belum diatur')}</strong></td></tr>
+                    <tr><th>Tahun Ajaran</th><td>${sanitizeHTML(s.academic_year || '2026/2027')}</td></tr>
+                    <tr><th>Status Siswa</th><td><span class="badge badge-success">${sanitizeHTML(s.status || 'Aktif')}</span></td></tr>
+                    <tr><th>Alamat Lengkap</th><td>${sanitizeHTML(s.address || '-')}</td></tr>
                 </table>
             `,
             confirmButtonText: 'Tutup'
         });
     }
 
-    function openTeacherModal(idx = null) {
-        document.getElementById('formTeacher').reset();
-        const modalTitle = document.querySelector('#teacherModal .modal-title');
+    function openStudentModal(idx = null) {
+        document.getElementById('formStudent').reset();
+        const modalTitle = document.querySelector('#studentModal .modal-title');
 
-        if (idx !== null && (window._adminTeachersCache || [])[idx]) {
-            const t = window._adminTeachersCache[idx];
-            modalTitle.textContent = 'Edit Data Guru';
-            document.getElementById('teacherId').value = t.id;
-            document.getElementById('tchNip').value = t.nip || '';
-            document.getElementById('tchName').value = t.full_name || '';
-            document.getElementById('tchPosition').value = t.position || '';
-            document.getElementById('tchEducation').value = t.education || '';
-            document.getElementById('tchPhone').value = t.phone || '';
-            document.getElementById('tchStatus').value = t.status || 'Aktif';
-            document.getElementById('tchBio').value = t.bio || '';
+        if (idx !== null && (window._adminStudentsCache || [])[idx]) {
+            const s = window._adminStudentsCache[idx];
+            modalTitle.textContent = 'Edit Data Siswa';
+            document.getElementById('studentId').value = s.id;
+            document.getElementById('stuNis').value = s.nis || '';
+            document.getElementById('stuName').value = s.full_name || '';
+            document.getElementById('stuNik').value = s.nik || '';
+            document.getElementById('stuAcademicYear').value = s.academic_year || '2026/2027';
+            document.getElementById('stuBirthPlace').value = s.birth_place || '';
+            document.getElementById('stuBirthDate').value = s.birth_date || '';
+            document.getElementById('stuGender').value = s.gender || 'Laki-laki';
+            document.getElementById('stuClassId').value = s.class_id || '';
+            document.getElementById('stuStatus').value = s.status || 'Aktif';
+            document.getElementById('stuAddress').value = s.address || '';
         } else {
-            modalTitle.textContent = 'Tambah Data Guru Baru';
-            document.getElementById('teacherId').value = '';
-            document.getElementById('tchStatus').value = 'Aktif';
+            modalTitle.textContent = 'Tambah Data Siswa Baru';
+            document.getElementById('studentId').value = '';
+            document.getElementById('stuAcademicYear').value = '2026/2027';
+            document.getElementById('stuStatus').value = 'Aktif';
         }
-        $('#teacherModal').modal('show');
+        $('#studentModal').modal('show');
     }
 
-    document.getElementById('formTeacher').addEventListener('submit', async (e) => {
+    document.getElementById('formStudent').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const btn = document.getElementById('btnSaveTeacher');
+        const btn = document.getElementById('btnSaveStudent');
         btn.disabled = true;
 
         try {
-            const editId = document.getElementById('teacherId').value;
-            const file = document.getElementById('tchPhotoFile').files[0];
-            const photoUrl = file ? await uploadFileToCloud(file, 'school-public', 'teachers') : null;
+            const editId = document.getElementById('studentId').value;
+            const file = document.getElementById('stuPhotoFile').files[0];
+            const photoUrl = file ? await uploadFileToCloud(file, 'school-public', 'students') : null;
 
             const payload = {
-                nip: document.getElementById('tchNip').value,
-                full_name: document.getElementById('tchName').value,
-                position: document.getElementById('tchPosition').value,
-                education: document.getElementById('tchEducation').value,
-                phone: document.getElementById('tchPhone').value,
-                status: document.getElementById('tchStatus').value,
-                bio: document.getElementById('tchBio').value,
+                nis: document.getElementById('stuNis').value,
+                full_name: document.getElementById('stuName').value,
+                nik: document.getElementById('stuNik').value || null,
+                academic_year: document.getElementById('stuAcademicYear').value || '2026/2027',
+                birth_place: document.getElementById('stuBirthPlace').value || null,
+                birth_date: document.getElementById('stuBirthDate').value || null,
+                gender: document.getElementById('stuGender').value,
+                class_id: document.getElementById('stuClassId').value || null,
+                status: document.getElementById('stuStatus').value,
+                address: document.getElementById('stuAddress').value || null,
                 ...(photoUrl && { photo_url: photoUrl })
             };
 
             if (editId) {
-                const { error } = await supabaseClient.from('teachers').update(payload).eq('id', editId);
+                const { error } = await supabaseClient.from('students').update(payload).eq('id', editId);
                 if (error) throw error;
-                await logAdminActivity('UPDATE_TEACHER', 'teachers', editId, `Memperbarui data guru ${payload.full_name}`);
-                Swal.fire('Diperbarui', 'Data guru berhasil diperbarui.', 'success');
+                await logAdminActivity('UPDATE_STUDENT', 'students', editId, `Memperbarui data siswa ${payload.full_name}`);
+                Swal.fire('Diperbarui', 'Data siswa berhasil diperbarui.', 'success');
             } else {
-                const { error } = await supabaseClient.from('teachers').insert([payload]);
+                const { error } = await supabaseClient.from('students').insert([payload]);
                 if (error) throw error;
-                await logAdminActivity('CREATE_TEACHER', 'teachers', payload.full_name, `Menambahkan guru ${payload.full_name}`);
-                Swal.fire('Tersimpan', 'Data guru berhasil ditambahkan.', 'success');
+                await logAdminActivity('CREATE_STUDENT', 'students', payload.nis, `Menambahkan siswa ${payload.full_name}`);
+                Swal.fire('Tersimpan', 'Data siswa berhasil ditambahkan.', 'success');
             }
 
-            $('#teacherModal').modal('hide');
-            loadTeachersAdmin();
+            $('#studentModal').modal('hide');
+            loadStudentsAdmin();
         } catch (err) {
             Swal.fire('Gagal', err.message, 'error');
         } finally {
